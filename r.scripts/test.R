@@ -348,7 +348,7 @@ experiment.files <- list("conifer.SimplePhyloModel-Yp5ke8X9.exec",
                          "conifer.TestPhyloExtraTaxa-NNA0Y5In.exec",
                          "conifer.HierarchicalPhyloModel-t6N3LgKL.exec")
 
-#experiment.files <- experiment.files[1]
+experiment.files <- c("conifer.TestPhyloModel-4Q5hg4Sh.exec")
   
 for (experiment in experiment.files) {
   sub.folders <- list.files(experiment)
@@ -746,6 +746,47 @@ replace <- function(x) {
 new=lapply(seq(length(x)), function(i) {
   unlist((lapply(getSequence(x)[[i]], function(c) replace(c))))  
 })
+
+
+
+
+# Pseudo code for conifer/Mr.Bayes comparison
+# For each model on the same initial values
+#   run the test on Mr. Bayes
+#   run the test on Conifer
+#   report ESS and final trees for both in a table
+#   clade posterior probabilities)
+
+
+
+# the model GTR
+
+
+
+
+### --- a chunk of code to append a tree block at the end of the alignment file
+## output the resulting trees in pdf
+# 1. 
+
+
+
+# run from command line
+# conifer , input tree, input alignment file
+# input parameters, and go, read parameters from an xml file
+# first run mrbayes
+# then run conifer
+# probably read the parameters in JSON formats
+
+
+# compute maximum clade tree
+# and ESS for the branch length and rate matrix parameters
+  
+
+
+
+
+
+
 
 
 
