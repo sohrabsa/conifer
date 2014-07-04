@@ -858,3 +858,172 @@ driver.function <- function() {
   writeLines(c(paste("Analysis took", elapsed.time, "seconds.")), "experiment.details.txt")
 }
 
+
+
+
+# for every tree
+# get all clades
+# add clades to all.clades
+
+# for clade in all.clades
+# find all occurances
+
+# for each clade
+  # for each clade in the list
+  # if the same clade ++
+
+
+# return clade / # of trees
+# result a table with clades and their probabilities
+
+the.tree <- rtree(4, rooted=F, tip.label = list("a", "b", "c", "d"))
+the.tree.1 <- rtree(4, rooted=F, tip.label = list("a", "b", "c", "d"))
+
+plot(the.tree)
+plot(the.tree.1)
+
+all.equal.phylo(the.tree, the.tree.1)
+
+
+
+k <- subtrees(the.tree)
+
+str(k)
+k[1]
+
+plot(the.tree)
+plot(k[[1]])
+plot(k[[2]])
+plot(k[[3]])
+
+k
+
+# reference 
+# http://www.phytools.org/eqg/Exercise_3.2/
+  
+
+
+# number of internal nodes
+the.tree.1$Nnode
+
+
+the.tree <- rtree(10, rooted=F)
+the.tree
+plot(the.tree.1)
+
+
+plot(extract.clade(the.tree.1, node=17))
+
+plot(the.tree)
+nodelabels()
+
+
+all.equal(the.tree.1, the.tree)
+
+all.equal(the.tree.1, the.tree)
+
+# multiple trees
+library(phytools
+trees <- pbtree(n = 6, nsim = 10, scale = 1)
+print(trees)
+
+str(trees)
+plot(trees)
+
+
+str(trees)
+class(trees[1])
+
+
+t <- trees[[1]]
+str(t)
+
+# get all caldes
+plot(t)
+
+all.clades <- lapply( seq(t$Nnode), function(x)  extract.clade(t, x + length(t$tip.label))   )
+
+str(all.clades)
+
+plot(all.clades[[5]])
+
+all.subtrees <- subtrees(t)
+
+str(all.subtrees)
+
+
+length(as.list(c(l1, l2)))
+
+# merge all subtrees
+
+
+all.sub.trees <- unlist(lapply( trees,   function(x)   subtrees(x)),  recursive = F)
+
+str(all.sub.trees)
+length(all.sub.trees)
+
+
+length(unique(all.sub.trees))
+length(unique(all.sub.trees))
+
+
+unlist(lapply(all.sub.trees, length))
+
+
+
+
+all.sub.trees[1]
+
+
+
+seq(t$Nnode)
+t$Nnode
+
+
+
+length(unique(all.sub.trees))
+length(all.sub.trees)
+
+
+all.sub.trees[1:10]
+
+
+q <- all.sub.trees
+class(q)
+class(q)<-"multiPhylo"
+
+class(q)
+
+unique(q)
+table(q)
+
+# give me the confidence fore the clade
+counts <- unlist(lapply( unique(all.sub.trees), function(st) sum(unlist(lapply(all.sub.trees, function(x) all.equal(st, x, use.edge.length = F))))   ))
+
+class(all.sub.trees) <- "multiPhylo"
+
+
+duplicated(q)
+
+
+
+q <- trees
+class(q) <- "multiPhylo"
+q
+
+
+for (i in seq(10)) {
+ for (j in seq(10)) {
+   if (i !=j ) {
+     if (all.equal(q[[i]], q[[j]], use.edge.length = F)) {
+       cat(i, " ", j, "\n")
+     }
+   }
+ } 
+}
+
+
+
+q.strings <- unlist(lapply(unique(all.sub.trees), write.tree))
+
+data.frame(clades=q.strings, counts=counts)
