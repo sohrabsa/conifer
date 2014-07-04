@@ -543,7 +543,7 @@ for (experiment in experiment.files) {
 setwd("/Users/sohrab/Me/Apply/Canada\ Apply/Courses/Third\ Semester/conifer/extras/mrbayes/FES_8_batch.GTR.two")
 #ff  <- "FES_4_batch.GTR.simple.nex.run1.p"
 ff  <- "FES_8_batch.GTR.two.nex.run1.p"
-kk <- read.table(ff, skip=1, header=T)
+kk <- read.table(ff, skip=1, header=T, check.names = F)
 head(kk)
 kk <- kk[, c(4:9)]
 head(kk)
@@ -782,11 +782,82 @@ new=lapply(seq(length(x)), function(i) {
 # and ESS for the branch length and rate matrix parameters
   
 
+# calculater ess for mrbayes
+# sample run of the mrbayes
 
 
+makeDataFileForMrBayes <- function(alignmentFile, treeFile) {
+  if (file_ext(alignmentFile) != "nex") {
+    # convert the alignment file from fasta to 
+    alignment.nex.file <- paste0(file_path_sans_ext(alignmentFile), ".nex")
+    commandString <- paste("seqmagick convert --output-format nexus --alphabet dna", alignmentFile, alignment.nex.file)
+    system(commandString)
+    alignmentFile <- alignment.nex.file
+  }
+  
+  # append the tree
+  theTree <- paste(readLines(treeFile), collapse = "")
+  treeBlock <- unlist(list("", "begin trees;", paste0("tree mm =", theTree), "end;"))
+  writeLines(treeBlock, "treeBlock.nex")
+  commandString <- paste("cat", alignmentFile, "treeBlock.nex", ">", "datafile.nex")
+  
+  system(commandString)
+}
+
+makeDataFileForMrBayes("FES_4.nex", "FES.ape.4.nwk")
 
 
+source("/Users/sohrab/Me/Apply/Canada Apply/Courses/Third Semester/conifer_fork/confier_fork/r.scripts/MrBayesBatch.R")
 
+compileBatchScriptForMrBayes <- function(data.file, bath.script.file.name) {
+  mrbayes <- new("mrbayesbatch")
+  setTags(mrbayes) <- list(command="set", list=list(autoclose="yes", nowarn="yes"))
+  addMultiPartCommand(mrbayes) <- (list("execute", data.file))
+  setTags(mrbayes) <- list(command="startvals", list=list(ntaust="mm", V="mm"))
+  setTags(mrbayes) <- list(command="lset", list=list(nst=6, rates="Equal"))
+  setTags(mrbayes) <- list(command="mcmc", list=list(ngen=10000, samplefreq="10"))
+  setTags(mrbayes) <- list(command="sump", list=list(burnin=1000))
+  setTags(mrbayes) <- list(command="sumt", list=list(burnin=1000))
+  writeToDisk(mrbayes, bath.script.file.name)  
+}
 
+mrbayes.analysis <- function(batch.script) {
+  system(paste0("mb ", batch.script), ignore.stdout = F)
+  #system(paste0("mb ", batch.script), ignore.stdout = T)
+}
 
+library(tools)
+
+driver.function <- function() {
+  # set dir where the mrbayes files should be placed  
+  batch.dir <- "/Users/sohrab/Me/Apply/Canada Apply/Courses/Third Semester/conifer/extras/mrbayes/jul.analysis"
+  setwd(batch.dir)
+  
+  batch.file.name <- "july.compile.batch"
+  data.file.name <- "FES_4.nex"
+  tree.file.name <- "FES.ape.4.nwk"
+  makeDataFileForMrBayes(alignmentFile=data.file.name, treeFile=tree.file.name)
+  compileBatchScriptForMrBayes(data.file=data.file.name, bath.script.file.name=batch.file.name)
+  
+  # get the elapsed time
+  the.run.time <- system.time(mrbayes.analysis(batch.file.name))
+  elapsed.time <- the.run.time[3]
+  
+  # calculate ESS and ESS per second
+  file.names <- list.files(".", pattern = "*\\.nex\\.run1\\.p")
+  ff  <- 
+  kk <- read.table(ff, skip=1, header=T, check.names = F)
+  kk <- kk[, c(4:9)]
+  
+  
+  
+  ESS <- effectiveSize(kk)
+  ESS <- effectiveSize(kk)/elapsed.time
+  
+  # save the values
+  write.table(data.frame(ESS, check.names = F), "ess.txt")
+  write.table(data.frame(ESSPS, check.names = F), "ess_per_second.txt")
+  
+  writeLines(list(paste("Analysis took", elapsed.time, "seconds.")), "experiment.details.txt")
+}
 
