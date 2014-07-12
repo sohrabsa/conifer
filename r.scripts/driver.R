@@ -1,8 +1,13 @@
 # Benchmark scaffold
 
 #source("/Users/sohrab/Me/Apply/Canada Apply/Courses/Third Semester/conifer_fork/confier_fork/r.scripts/MrBayesBatch.R")
-source("/home/sohrab/conifer/r.scripts/MrBayesBatch.R")
-source("/home/sohrab/conifer/r.scripts/clader.R")
+mainDIR <- "/home/sohrab/conifer/r.scripts/"
+source(file.path(mainDIR, "MrBayesBatch.R"))
+source(file.path(mainDIR, "clader.R"))
+source(file.path(mainDIR, "essGeneric.R"))
+
+
+dataDir <- "/home/sohrab/conifer/src/main/resources/conifer/sampleInput"
 
 
 # read the input and output fasta full paths from stdin
@@ -78,6 +83,7 @@ driver <- function() {
     
   #   2.2 conifer
   #     2.2.1. run conifer with the inputs
+  conifer <- conifer.driver.function(alignment.path, initial.tree.path)
   #     2.2.2. parse the outputs of conifer and produce ESS, ESSperSec, consensus tree with clade support, and clade support csv
   #     2.2.3. create symlinks in the output folder
   
@@ -85,8 +91,14 @@ driver <- function() {
   
   # 3. comparison
   #     3.1. ESS
-  #       3.1.1. combined mrbayes and conifer ess data.frame 
+  #       3.1.1. combined mrbayes and conifer ess data.frame
+  mrbayes.ess <- get.ess(mrbayes)
+  conifer.ess <- get.ess(conifer)
+  ess <- combine.ess(mrbayes.ess, conifer.ess)
   #       3.1.2. barchart of mrbayes and conifer
+  make.ess.barchart(ess)
+  
+  
   #     3.2. ESSperSec
   
   #     3.3. consensus tree
@@ -106,6 +118,8 @@ driver <- function() {
 
   }
 }
+
+
 
 
 

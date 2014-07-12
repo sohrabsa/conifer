@@ -1,6 +1,7 @@
 library(tools)
 library(coda)
-source("/home/sohrab/conifer/r.scripts/MrBayesBatch.R")
+source(file.path(mainDIR, "MrBayesBatch.R"))
+source(file.path(mainDIR, "clader2.R"))
 
 makeDataFileForMrBayes <- function(alignmentFile, treeFile) {
   if (file_ext(alignmentFile) != "nex") {
@@ -40,11 +41,15 @@ mrbayes.analysis <- function(batch.script) {
 
 
 mrbayes.calculate.ESS <- function(elapsed.time) {
-  file.names <- list.files(".", pattern = "*\\\\.run1\\.p")
+  file.names <- list.files(".", pattern = "*.run1.p")
   mrbayes.posterior <- read.table(file.names[1], skip=1, header=T, check.names=F)
   mrbayes.posterior <- mrbayes.posterior[, c(3:9)]
   
   ESS <- effectiveSize(mrbayes.posterior)
+  
+  # standardize column names
+  ESS <- mrbayes.standardizeColumns.ESS(ESS)
+  
   ESSPS <- effectiveSize(mrbayes.posterior)/elapsed.time
   
   # save the values
@@ -52,13 +57,26 @@ mrbayes.calculate.ESS <- function(elapsed.time) {
   write.table(data.frame(ESSPS, check.names=F), "ess_per_second.txt")
 }
 
+# map column names from mrbayes's output to those from conifer
+mrbayes.standardizeColumns.ESS <- function(ESS) {
+  
+  b <- names(ESS)
+  # change from r(A<->C) to q(A(0),C(0))
+  names(ESS) <- gsub("r\\(", "q\\(", names(ESS))
+  names(ESS) <- gsub("<->", ",", names(ESS))
+  names(ESS) <- gsub("([ACTG])", "\1(0)", names(ESS), perl = T)
+  names(ESS) <- gsub("([ACTG])", "\\1(0)", names(ESS), perl = T)
+  ESS
+}
 
+
+# TODO save support as node.lables
 mrbayes.calculate.consensus.tree <- function(burn.in, thinning) {
-  file.names <- list.files(".", pattern = "*\\.tree[1-9]\\.run1\\.t")
-  all.trees <- read.nexus(file.names[[1]])
+  file.names <- list.files(".", pattern = "*.run1.t")
+  all.trees <- read.nexus(file.names[1])
   
   # get rid of the burn.in period
-  burn.in <-as.integer(burn.in / thining)
+  burn.in <-as.integer(burn.in / thinning)
   all.trees <- all.trees[-c(1:burn.in)]
   N <- length(all.trees)
   
@@ -79,14 +97,22 @@ mrbayes.calculate.consensus.tree <- function(burn.in, thinning) {
 }
 
 
+
+
+
 mrbayes.driver.function <- function(tree.file.name, alignment.file.name) {
   # set dir where the mrbayes files should be placed  
-  batch.dir <- "/Users/sohrab/Me/Apply/Canada Apply/Courses/Third Semester/conifer/extras/mrbayes/jul.analysis"
+  batch.dir <- "/home/sohrab/conifer_fork/mrbayes"
   setwd(batch.dir)
   
   batch.file.name <- "july.compile.batch"
-  alignment.file.name <- "FES_4.nex"
+  alignment.file.name <- "FES_4.fasta"
   tree.file.name <- "FES.ape.4.nwk"
+  
+  # make symbolik links to the data.files
+  system(paste0("ln -s ", file.path(dataDir, alignment.file.name), " ", batch.dir))
+  system(paste0("ln -s ", file.path(dataDir, tree.file.name), " ", batch.dir))
+  
   makeDataFileForMrBayes(alignmentFile=alignment.file.name, treeFile=tree.file.name)
   compileBatchScriptForMrBayes(data.file="datafile.nex", bath.script.file.name=batch.file.name)
   
@@ -98,11 +124,13 @@ mrbayes.driver.function <- function(tree.file.name, alignment.file.name) {
   mrbayes.calculate.ESS(elapsed.time)
   
   # calculate the concensus tree
-  mrbayes.calculate.consensus.tree()
+  mrbayes.calculate.consensus.tree(100, 10)
   
   # keep record of the analysis time
   writeLines(c(paste("Analysis for ", batch.file.name, ", took", elapsed.time, "seconds.")), "experiment.details.txt")
 }
 
+
+mrbayes.driver.function("FES.ape.4.nwk", "FES_4.fasta")
 
 #consensus <- read.nexus("/Users/sohrab/Me/Apply/Canada\ Apply/Courses/Third\ Semester/conifer/extras/mrbayes/FES_8_batch.GTR.two/FES_8_batch.GTR.two.nex.tree1.con.tre")

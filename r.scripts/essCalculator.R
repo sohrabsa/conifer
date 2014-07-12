@@ -8,6 +8,12 @@ if (!require(coda)) {
   install.packages("coda", dep=TRUE)
 }
 library(coda)
+library(lattice)
+
+
+
+"/home/sohrab/conifer/results/all/2014-07-12-11-36-46-GeyVzxr6.exec"
+
 
 calculateESS <- function(input.dir) {
   experiment.files <- c(input.dir)
@@ -89,7 +95,7 @@ if (length(args) < 1) {
 }
   
 # compute and write the ess for each processable css file in the folder lists
-setwd("/Users/sohrab/Me/Apply/Canada Apply/Courses/Third Semester/conifer/results/all/")
+#setwd("/Users/sohrab/Me/Apply/Canada Apply/Courses/Third Semester/conifer/results/all/")
 
 
 
