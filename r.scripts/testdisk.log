@@ -108,3 +108,837 @@ Sectors are not identical.
 
 A valid NTFS Boot sector must be present in order to access
 any data; even if the partition is not bootable.
+rebuild_NTFS_BS
+Failed to rebuild NTFS boot sector.
+
+ntfs_boot_sector
+ 1 P HPFS - NTFS                   63  625137343  625137281
+filesystem size           6779790688894579039 1
+sectors_per_cluster       74 0
+mft_lcn                   17166209715927474169 0
+mftmirr_lcn               11661569371010191397 0
+clusters_per_mft_record   53 0
+clusters_per_index_record -121 0
+Boot sector
+Status: Bad
+
+Backup boot sector
+Status: Bad
+
+Sectors are not identical.
+
+A valid NTFS Boot sector must be present in order to access
+any data; even if the partition is not bootable.
+Boot sector                        Backup boot sector
+0000 17caff57 fd971184   ...W....  00000000 00000000   ........
+0008 b3464adf 134a7f6c   .FJ..J.l  00000000 00000000   ........
+0010 e6a0328a 45a79125   ..2.E..%  00000000 00000000   ........
+0018 b9a5fcf6 caebd5b2   ........  00000000 00000000   ........
+0020 bccfc49b 1de3edf4   ........  00000000 00000000   ........
+0028 5ef10fef b5a7165e   ^......^  00000000 00000000   ........
+0030 f95fb741 c9a03aee   ._.A..:.  00000000 00000000   ........
+0038 2550a3aa 8e37d6a1   %P...7..  00000000 00000000   ........
+0040 355b077f 8784053e   5[.....>  00000000 00000000   ........
+0048 0a5dd990 cd8e59e7   .]....Y.  00000000 00000000   ........
+0050 b9fbfd3a 5c9d1acd   ...:\...  00000000 00000000   ........
+0058 89e7d4c4 f87c4494   .....|D.  00000000 00000000   ........
+0060 c0e0a1b9 ff2fe5ad   ...../..  00000000 00000000   ........
+0068 45d1c707 ee41ef4c   E....A.L  00000000 00000000   ........
+0070 e3f76e84 1b876d49   ..n...mI  00000000 00000000   ........
+0078 b327b397 8310a87e   .'.....~  00000000 00000000   ........
+0080 75cba4cd 71623ecd   u...qb>.  00000000 00000000   ........
+0088 cb3a86ef c9f21d5b   .:.....[  00000000 00000000   ........
+0090 09e55607 6a935dd6   ..V.j.].  00000000 00000000   ........
+0098 e2075435 6c7a7775   ..T5lzwu  00000000 00000000   ........
+00A0 c20596b5 5f48cac0   ...._H..  00000000 00000000   ........
+00A8 da79d4ba 03a95efa   .y....^.  00000000 00000000   ........
+00B0 b0436c37 c0c77af8   .Cl7..z.  00000000 00000000   ........
+00B8 ac0228d9 97824a42   ..(...JB  00000000 00000000   ........
+00C0 e2f597a6 8cd90e23   .......#  00000000 00000000   ........
+00C8 14ba7fa1 29ea4dbe   ....).M.  00000000 00000000   ........
+00D0 5f4fc188 a8fbab67   _O.....g  00000000 00000000   ........
+00D8 514fa7b7 95849c8b   QO......  00000000 00000000   ........
+00E0 83fd4391 6dfdaf16   ..C.m...  00000000 00000000   ........
+00E8 b1f1cdad 4edafe2c   ....N..,  00000000 00000000   ........
+00F0 28bd2265 df74bc80   (."e.t..  00000000 00000000   ........
+00F8 e60a6a39 bc028d51   ..j9...Q  00000000 00000000   ........
+0100 fcd9a091 3e301e9c   ....>0..  00000000 00000000   ........
+0108 d9250e69 b3a79d9e   .%.i....  00000000 00000000   ........
+0110 539a821f e1a33b8c   S.....;.  00000000 00000000   ........
+0118 775c37ae 61276faf   w\7.a'o.  00000000 00000000   ........
+0120 58fb1153 3db85c48   X..S=.\H  00000000 00000000   ........
+0128 ffa69a65 8ac45960   ...e..Y`  00000000 00000000   ........
+0130 da45715b ad2f8530   .Eq[./.0  00000000 00000000   ........
+0138 4e47a83a 4d9198f2   NG.:M...  00000000 00000000   ........
+0140 a002c5cf 429e58d2   ....B.X.  00000000 00000000   ........
+0148 cc250757 23e3cab3   .%.W#...  00000000 00000000   ........
+0150 a6655045 81e920f4   .ePE.. .  00000000 00000000   ........
+0158 6308d660 4cf74de6   c..`L.M.  00000000 00000000   ........
+0160 7c566a0a 976ae2af   |Vj..j..  00000000 00000000   ........
+0168 1e1222a8 763b5f67   ..".v;_g  00000000 00000000   ........
+0170 aa90069f 28795524   ....(yU$  00000000 00000000   ........
+0178 acf46c8e eac115fc   ..l.....  00000000 00000000   ........
+0180 88971a11 fbe6ebbc   ........  00000000 00000000   ........
+0188 8b970a2e 315782d5   ....1W..  00000000 00000000   ........
+0190 10493113 829034fe   .I1...4.  00000000 00000000   ........
+0198 d49880cb 6526ae55   ....e&.U  00000000 00000000   ........
+01A0 d28d4aa2 53c5e4a0   ..J.S...  00000000 00000000   ........
+01A8 e4c9f44d 75182a39   ...Mu.*9  00000000 00000000   ........
+01B0 10fbe812 2be07985   ....+.y.  00000000 00000000   ........
+01B8 0e62b55a e28b8319   .b.Z....  00000000 00000000   ........
+01C0 ff854234 280a661a   ..B4(.f.  00000000 00000000   ........
+01C8 d025af1d c3527684   .%...Rv.  00000000 00000000   ........
+01D0 16b8dcef df113991   ......9.  00000000 00000000   ........
+01D8 e535628a 229383ee   .5b."...  00000000 00000000   ........
+01E0 bfa6ef12 9a09734e   ......sN  00000000 00000000   ........
+01E8 e2da9601 74765c18   ....tv\.  00000000 00000000   ........
+01F0 3c8b548d da0b3d39   <.T...=9  00000000 00000000   ........
+01F8 2e95384a 99d0c56d   ..8J...m  00000000 00000000   ........
+
+ntfs_boot_sector
+ 1 P HPFS - NTFS                   63  625137343  625137281
+filesystem size           6779790688894579039 1
+sectors_per_cluster       74 0
+mft_lcn                   17166209715927474169 0
+mftmirr_lcn               11661569371010191397 0
+clusters_per_mft_record   53 0
+clusters_per_index_record -121 0
+Boot sector
+Status: Bad
+
+Backup boot sector
+Status: Bad
+
+Sectors are not identical.
+
+A valid NTFS Boot sector must be present in order to access
+any data; even if the partition is not bootable.
+NTFS signature is missing.
+NTFS signature is missing.
+NTFS signature is missing.
+NTFS signature is missing.
+Not an exFAT boot sector.
+
+ 1 P HPFS - NTFS                   63  625137343  625137281
+Can't open filesystem. Filesystem seems damaged.
+
+ 1 P HPFS - NTFS                   63  625137343  625137281
+Can't open filesystem. Filesystem seems damaged.
+
+Analyse Disk /dev/sdd - 320 GB / 298 GiB - 625142448 sectors
+Geometry from i386 MBR: head=1 sector=1
+check_part_i386 failed for partition type 07
+get_geometry_from_list_part_aux head=1 nbr=2
+Current partition structure:
+Invalid NTFS or EXFAT boot
+ 1 P HPFS - NTFS                   63  625137343  625137281
+ 1 P HPFS - NTFS                   63  625137343  625137281
+No partition is bootable
+
+search_part()
+Disk /dev/sdd - 320 GB / 298 GiB - 625142448 sectors
+
+HFS+ magic value at 63/0/1
+part_size 486717952
+     HFS                           63  486718014  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 487176803/0/1
+part_size 486717952
+     HFS                    487176803  973894754  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+This partition ends after the disk limits. (start=487176803, size=486717952, end=973894754, disk end=625142448)
+
+HFS+ magic value at 487176805/0/1
+part_size 486717952
+     HFS                       458855  487176806  486717952
+     HFS+ found using backup sector!, 249 GB / 232 GiB
+
+HFS+ magic value at 487176807/0/1
+part_size 1269536
+     HFS                    487176807  488446342    1269536
+     HFS+ blocksize=4096, 650 MB / 619 MiB
+Search for partition aborted
+Disk /dev/sdd - 320 GB / 298 GiB - 625142448 sectors
+Check the harddisk size: HD jumpers settings, BIOS detection...
+The harddisk (320 GB / 298 GiB) seems too small! (< 498 GB / 464 GiB)
+The following partition can't be recovered:
+     HFS                    487176803  973894754  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+get_geometry_from_list_part_aux head=1 nbr=6
+
+Results
+     HFS                           63  486718014  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       458855  487176806  486717952
+     HFS+ found using backup sector!, 249 GB / 232 GiB
+   * HFS                    487176807  488446342    1269536
+     HFS+ blocksize=4096, 650 MB / 619 MiB
+
+interface_write()
+ 1 * HFS                    487176807  488446342    1269536
+
+search_part()
+Disk /dev/sdd - 320 GB / 298 GiB - 625142448 sectors
+
+HFS+ magic value at 63/0/1
+part_size 486717952
+     HFS                           63  486718014  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 65/0/1
+BAD_RS LBA=2828549035 973
+check_FAT: can't read FAT boot sector
+check_part_i386 failed for partition type 06
+     FAT16 >32M            2828549035 4153372935 1324823901
+This partition ends after the disk limits. (start=2828549035, size=1324823901, end=4153372935, disk end=625142448)
+
+HFS+ magic value at 699450/0/1
+part_size 486717952
+     HFS                       699450  487417401  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 699452/0/1
+
+HFS+ magic value at 700147/0/1
+part_size 486717952
+     HFS                       700147  487418098  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 700149/0/1
+
+HFS+ magic value at 701076/0/1
+part_size 486717952
+     HFS                       701076  487419027  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 701078/0/1
+
+HFS+ magic value at 703045/0/1
+part_size 486717952
+     HFS                       703045  487420996  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 703047/0/1
+
+HFS+ magic value at 703174/0/1
+part_size 486717952
+     HFS                       703174  487421125  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 703176/0/1
+
+HFS+ magic value at 706023/0/1
+part_size 486717952
+     HFS                       706023  487423974  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 706025/0/1
+
+HFS+ magic value at 706120/0/1
+part_size 486717952
+     HFS                       706120  487424071  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 706122/0/1
+
+HFS+ magic value at 706489/0/1
+part_size 486717952
+     HFS                       706489  487424440  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 706491/0/1
+
+HFS+ magic value at 706610/0/1
+part_size 486717952
+     HFS                       706610  487424561  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 706612/0/1
+
+HFS+ magic value at 707310/0/1
+part_size 486717952
+     HFS                       707310  487425261  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 707312/0/1
+
+HFS+ magic value at 708207/0/1
+part_size 486717952
+     HFS                       708207  487426158  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 708209/0/1
+
+HFS+ magic value at 708648/0/1
+part_size 486717952
+     HFS                       708648  487426599  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 708650/0/1
+
+HFS+ magic value at 709313/0/1
+part_size 486717952
+     HFS                       709313  487427264  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 709315/0/1
+
+HFS+ magic value at 709882/0/1
+part_size 486717952
+     HFS                       709882  487427833  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 709884/0/1
+
+HFS+ magic value at 710347/0/1
+part_size 486717952
+     HFS                       710347  487428298  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 710349/0/1
+
+HFS+ magic value at 710660/0/1
+part_size 486717952
+     HFS                       710660  487428611  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 710662/0/1
+
+HFS+ magic value at 711325/0/1
+part_size 486717952
+     HFS                       711325  487429276  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 711327/0/1
+
+HFS+ magic value at 712446/0/1
+part_size 486717952
+     HFS                       712446  487430397  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 712448/0/1
+
+HFS+ magic value at 713255/0/1
+part_size 486717952
+     HFS                       713255  487431206  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 713257/0/1
+
+HFS+ magic value at 713688/0/1
+part_size 486717952
+     HFS                       713688  487431639  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 713690/0/1
+
+HFS+ magic value at 714313/0/1
+part_size 486717952
+     HFS                       714313  487432264  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 714315/0/1
+
+HFS+ magic value at 714834/0/1
+part_size 486717952
+     HFS                       714834  487432785  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 714836/0/1
+
+HFS+ magic value at 715155/0/1
+part_size 486717952
+     HFS                       715155  487433106  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 715157/0/1
+
+HFS+ magic value at 715244/0/1
+part_size 486717952
+     HFS                       715244  487433195  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 715246/0/1
+
+HFS+ magic value at 715853/0/1
+part_size 486717952
+     HFS                       715853  487433804  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 715855/0/1
+
+HFS+ magic value at 716662/0/1
+part_size 486717952
+     HFS                       716662  487434613  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 716664/0/1
+
+HFS+ magic value at 716815/0/1
+part_size 486717952
+     HFS                       716815  487434766  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 716817/0/1
+
+HFS+ magic value at 716968/0/1
+part_size 486717952
+     HFS                       716968  487434919  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 716970/0/1
+
+HFS+ magic value at 717097/0/1
+part_size 486717952
+     HFS                       717097  487435048  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 717099/0/1
+
+HFS+ magic value at 717234/0/1
+part_size 486717952
+     HFS                       717234  487435185  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 717236/0/1
+
+HFS+ magic value at 719195/0/1
+part_size 486717952
+     HFS                       719195  487437146  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 719197/0/1
+
+HFS+ magic value at 719740/0/1
+part_size 486717952
+     HFS                       719740  487437691  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 719742/0/1
+
+HFS+ magic value at 720621/0/1
+part_size 486717952
+     HFS                       720621  487438572  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 720623/0/1
+
+HFS+ magic value at 722334/0/1
+part_size 486717952
+     HFS                       722334  487440285  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 722336/0/1
+
+HFS+ magic value at 722831/0/1
+part_size 486717952
+     HFS                       722831  487440782  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 722833/0/1
+
+HFS+ magic value at 723792/0/1
+part_size 486717952
+     HFS                       723792  487441743  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 723794/0/1
+
+HFS+ magic value at 726985/0/1
+part_size 486717952
+     HFS                       726985  487444936  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 726987/0/1
+
+HFS+ magic value at 727538/0/1
+part_size 486717952
+     HFS                       727538  487445489  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 727540/0/1
+
+HFS+ magic value at 727819/0/1
+part_size 486717952
+     HFS                       727819  487445770  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 727821/0/1
+
+HFS+ magic value at 728052/0/1
+part_size 486717952
+     HFS                       728052  487446003  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 728054/0/1
+
+HFS+ magic value at 728253/0/1
+part_size 486717952
+     HFS                       728253  487446204  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 728255/0/1
+
+HFS+ magic value at 728382/0/1
+part_size 486717952
+     HFS                       728382  487446333  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 728384/0/1
+
+HFS+ magic value at 728623/0/1
+part_size 486717952
+     HFS                       728623  487446574  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 728625/0/1
+
+HFS+ magic value at 728728/0/1
+part_size 486717952
+     HFS                       728728  487446679  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 728730/0/1
+
+HFS+ magic value at 728913/0/1
+part_size 486717952
+     HFS                       728913  487446864  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 728915/0/1
+
+HFS+ magic value at 729194/0/1
+part_size 486717952
+     HFS                       729194  487447145  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 729196/0/1
+
+HFS+ magic value at 729483/0/1
+part_size 486717952
+     HFS                       729483  487447434  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 729485/0/1
+
+HFS+ magic value at 729804/0/1
+part_size 486717952
+     HFS                       729804  487447755  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 729806/0/1
+
+HFS+ magic value at 729893/0/1
+part_size 486717952
+     HFS                       729893  487447844  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 729895/0/1
+
+HFS+ magic value at 730102/0/1
+part_size 486717952
+     HFS                       730102  487448053  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 730104/0/1
+
+HFS+ magic value at 730223/0/1
+part_size 486717952
+     HFS                       730223  487448174  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 730225/0/1
+
+HFS+ magic value at 730344/0/1
+part_size 486717952
+     HFS                       730344  487448295  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 730346/0/1
+
+HFS+ magic value at 730593/0/1
+part_size 486717952
+     HFS                       730593  487448544  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 730595/0/1
+
+HFS+ magic value at 730690/0/1
+part_size 486717952
+     HFS                       730690  487448641  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 730692/0/1
+
+HFS+ magic value at 731035/0/1
+part_size 486717952
+     HFS                       731035  487448986  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 731037/0/1
+
+HFS+ magic value at 731604/0/1
+part_size 486717952
+     HFS                       731604  487449555  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 731606/0/1
+
+HFS+ magic value at 731773/0/1
+part_size 486717952
+     HFS                       731773  487449724  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 731775/0/1
+
+HFS+ magic value at 731910/0/1
+part_size 486717952
+     HFS                       731910  487449861  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 731912/0/1
+
+HFS+ magic value at 732063/0/1
+part_size 486717952
+     HFS                       732063  487450014  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 732065/0/1
+
+HFS+ magic value at 732880/0/1
+part_size 486717952
+     HFS                       732880  487450831  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 732882/0/1
+
+HFS+ magic value at 735513/0/1
+part_size 486717952
+     HFS                       735513  487453464  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 735515/0/1
+
+HFS+ magic value at 736474/0/1
+part_size 486717952
+     HFS                       736474  487454425  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 736476/0/1
+
+HFS+ magic value at 740115/0/1
+part_size 486717952
+     HFS                       740115  487458066  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 740117/0/1
+
+HFS+ magic value at 741068/0/1
+part_size 486717952
+     HFS                       741068  487459019  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 741070/0/1
+
+HFS+ magic value at 741813/0/1
+part_size 486717952
+     HFS                       741813  487459764  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 741815/0/1
+
+HFS+ magic value at 743574/0/1
+part_size 486717952
+     HFS                       743574  487461525  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 743576/0/1
+
+HFS+ magic value at 745415/0/1
+part_size 486717952
+     HFS                       745415  487463366  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 745417/0/1
+
+HFS+ magic value at 746184/0/1
+part_size 486717952
+     HFS                       746184  487464135  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+HFS+ magic value at 746186/0/1
+Search for partition aborted
+Disk /dev/sdd - 320 GB / 298 GiB - 625142448 sectors
+Check the harddisk size: HD jumpers settings, BIOS detection...
+The harddisk (320 GB / 298 GiB) seems too small! (< 2126 GB / 1980 GiB)
+The following partition can't be recovered:
+     FAT16 >32M            2828549035 4153372935 1324823901
+get_geometry_from_list_part_aux head=1 nbr=138
+get_geometry_from_list_part_aux head=8 nbr=26
+get_geometry_from_list_part_aux head=16 nbr=7
+get_geometry_from_list_part_aux head=32 nbr=2
+get_geometry_from_list_part_aux head=64 nbr=1
+
+Results
+     HFS                           63  486718014  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       699450  487417401  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       700147  487418098  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       701076  487419027  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       703045  487420996  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       703174  487421125  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       706023  487423974  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       706120  487424071  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       706489  487424440  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       706610  487424561  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       707310  487425261  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       708207  487426158  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       708648  487426599  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       709313  487427264  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       709882  487427833  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       710347  487428298  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       710660  487428611  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       711325  487429276  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       712446  487430397  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       713255  487431206  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       713688  487431639  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       714313  487432264  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       714834  487432785  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       715155  487433106  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       715244  487433195  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       715853  487433804  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       716662  487434613  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       716815  487434766  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       716968  487434919  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       717097  487435048  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       717234  487435185  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       719195  487437146  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       719740  487437691  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       720621  487438572  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       722334  487440285  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       722831  487440782  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       723792  487441743  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       726985  487444936  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       727538  487445489  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       727819  487445770  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       728052  487446003  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       728253  487446204  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       728382  487446333  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       728623  487446574  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       728728  487446679  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       728913  487446864  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       729194  487447145  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       729483  487447434  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       729804  487447755  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       729893  487447844  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       730102  487448053  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       730223  487448174  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       730344  487448295  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       730593  487448544  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       730690  487448641  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       731035  487448986  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       731604  487449555  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       731773  487449724  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       731910  487449861  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       732063  487450014  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       732880  487450831  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       735513  487453464  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       736474  487454425  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       740115  487458066  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       741068  487459019  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       741813  487459764  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       743574  487461525  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       745415  487463366  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+     HFS                       746184  487464135  486717952
+     HFS+ blocksize=4096, 249 GB / 232 GiB
+
+interface_write()
+ 
+No partition found or selected for recovery
+NTFS signature is missing.
+NTFS signature is missing.
+simulate write!
+
+write_mbr_i386: starting...
+write_all_log_i386: starting...
+No extended partition
+
+Interface Advanced
+Geometry from i386 MBR: head=1 sector=1
+check_part_i386 failed for partition type 07
+get_geometry_from_list_part_aux head=1 nbr=2
+ 1 P HPFS - NTFS                   63  625137343  625137281
+Not an exFAT boot sector.
+
+ 1 P HPFS - NTFS                   63  625137343  625137281
+Can't open filesystem. Filesystem seems damaged.
+
+TestDisk exited normally.

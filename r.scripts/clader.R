@@ -142,6 +142,13 @@ t <- trees[[2]]
 unlist(lapply(seq(length(subtrees(t))), function(j) count.of.clade(subtrees(t)[[j]])))
 
 prop.part(t)
+reload.context <- function() {
+  all.sub.trees <<- get.sub.trees(trees)
+  unique.sub.trees <<- unique(all.sub.trees)
+  counts <<- get.count.array(unique.sub.trees, all.sub.trees)
+}
+
+find.all.clade.s
 
 ?prop.clades
 
@@ -151,14 +158,7 @@ prop.part(t)
 all.sub.trees <- NA
 unique.sub.trees <- NA
 counts <- NA
-
-reload.context <- function() {
-  all.sub.trees <<- get.sub.trees(trees)
-  unique.sub.trees <<- unique(all.sub.trees)
-  counts <<- get.count.array(unique.sub.trees, all.sub.trees)
-}
-
-find.all.clade.supports <- function(tree, trees, reload.context=F) {
+upports <- function(tree, trees, reload.context=F) {
   if(reload.context) reload.context()
   unlist(lapply(seq(length(subtrees(tree))), function(j) count.of.clade(subtrees(tree)[[j]], unique.sub.trees, counts)))
 }
@@ -186,17 +186,22 @@ print(prop.part(tree, trees[c(1,2,3)]))
     # if (s == t) count.t ++
 
 all.sub.trees <- get.sub.trees(trees)
-counts <- list()
-tree <- trees[[5]]
-for (clade in subtrees(tree)) {
-  index <- length(counts) + 1
-  counts[[index]] <- 0
-  
-  for (subtree in all.sub.trees) {
-    if (all.equal(clade, subtree, use.edge.length = F)) {
-      counts[[index]] <- counts[[index]] + 1
+
+
+get.count.for.tree <- function(tree, all.sub.trees) {
+  counts <- list()
+  for (clade in subtrees(tree)) {
+    index <- length(counts) + 1
+    counts[[index]] <- 0
+    
+    for (subtree in all.sub.trees) {
+      if (all.equal(clade, subtree, use.edge.length = F)) {
+        counts[[index]] <- counts[[index]] + 1
+      }
     }
   }
+  
+  unlist(counts)
 }
 
 counts <- unlist(counts)
@@ -210,7 +215,14 @@ par(mfrow=c(1,2))
 plot(t2)
 nodelabels()
 plot(t1, direction = "leftwards")
+ls()
 
+plot(t2)
+nodelabels(text=c("S"), node=c(7))
+nodelabels()
+
+# given counts, return the text and node arguments
+plot(tre
 # for each internal node
 s <- subtrees(t2)
 class(s) <- "multiPhylo"
@@ -218,14 +230,7 @@ class(s) <- "multiPhylo"
 str(s[[1]])
 min(s[[1]]$node.label)
 plot(s[[1]])
-nodelabels()
-
-plot(t2)
-nodelabels(text=c("S"), node=c(7))
-nodelabels()
-
-# given counts, return the text and node arguments
-plot(tree)
+nodelabee)
 set.node.labels <- function(tree, counts) {
   s <- unlist(lapply(subtrees(tree), function(t)  min(t$node.label)))
   nodelabels(text=counts, node=s)
@@ -234,10 +239,29 @@ set.node.labels <- function(tree, counts) {
 plot(t2)
 set.node.labels(tree, counts)
 
-plot.side.by.side <- function(tree1, tree2, counts) {
+
+
+trees <- pbtree(n = 6, nsim = 11, scale = 1, rooted=T)
+c <- consensus(trees)
+
+write.tree(c)
+
+all.sub.trees <<- get.sub.trees(trees)
+
+tree1 <- trees[[1]]
+tree2 <- trees[[2]]
+
+plot.side.by.side <- function(tree1, tree2) {
   par(mfrow=c(1,2))
   plot(tree1)
-  set.node.labels(tree1, counts)
+  nodelabels(tree1$node.label)
+  #set.node.labels(tree1, get.count.for.tree(tree1, all.sub.trees))
   plot(tree2, direction = "leftwards")
-  set.node.labels(tree2, counts)
+  nodelabels(tree2$node.label)
+  #set.node.labels(tree2, get.count.for.tree(tree1, all.sub.trees))
 }
+
+add.support.to.tree <- function(tree, )
+
+
+plot.side.by.side(tree1, tree2, all.sub.trees)

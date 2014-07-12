@@ -923,7 +923,7 @@ all.equal(the.tree.1, the.tree)
 all.equal(the.tree.1, the.tree)
 
 # multiple trees
-library(phytools
+library(phytools  
 trees <- pbtree(n = 6, nsim = 10, scale = 1)
 print(trees)
 

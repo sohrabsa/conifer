@@ -1,7 +1,8 @@
 # Benchmark scaffold
 
-source("/Users/sohrab/Me/Apply/Canada Apply/Courses/Third Semester/conifer_fork/confier_fork/r.scripts/MrBayesBatch.R")
-
+#source("/Users/sohrab/Me/Apply/Canada Apply/Courses/Third Semester/conifer_fork/confier_fork/r.scripts/MrBayesBatch.R")
+source("/home/sohrab/conifer/r.scripts/MrBayesBatch.R")
+source("/home/sohrab/conifer/r.scripts/clader.R")
 
 
 # read the input and output fasta full paths from stdin
@@ -20,7 +21,6 @@ if (length(args) < 1) {
 
 # compute and write the ess for each processable css file in the folder lists
 setwd("/Users/sohrab/Me/Apply/Canada Apply/Courses/Third Semester/conifer/results/all/")
-
 
 
 # point of entry to the script
@@ -69,19 +69,42 @@ driver <- function() {
   # 2. run mrbayes and conifer with the given inputs
   #   2.1. mrbayes
   #     2.1.1. run mrbayes with the inputs
-  mrbayes.driver.function(alignment.path, initial.tree.path)
+  mrbayes <- mrbayes.driver.function(alignment.path, initial.tree.path)
   
   # TODO: check if mrbayes.driver.function worked
+  
   #     2.1.2. parse the outputs of mrbayes and produce ESS, ESSperSec, consensus tree with clade support, and clade support csv
   #     2.1.3. create symlinks in the output folder
-  
     
+  #   2.2 conifer
+  #     2.2.1. run conifer with the inputs
+  #     2.2.2. parse the outputs of conifer and produce ESS, ESSperSec, consensus tree with clade support, and clade support csv
+  #     2.2.3. create symlinks in the output folder
+  
+  
+  
+  # 3. comparison
+  #     3.1. ESS
+  #       3.1.1. combined mrbayes and conifer ess data.frame 
+  #       3.1.2. barchart of mrbayes and conifer
+  #     3.2. ESSperSec
+  
+  #     3.3. consensus tree
+  #       3.3.1. head to head graphs
+  
+  # load consensus trees
+  tree1 <- get.consensus.tree(mrbayes)
+  tree2 <- get.consensus.tree(conifer)
+  plot.side.by.side(tree1, tree2)
+  
+  
+  #     3.4. clade support
+  #       3.4.1. table with clades with high posterior
+  #       3.4.2. table with common clade, probability in both mrbayes and conifer
+  #       3.4.3. over the same tips, head to head clades with highest probability
+  #
+
   }
-  
-  
-  
-  
-  
 }
 
 
