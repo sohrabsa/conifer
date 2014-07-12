@@ -1,0 +1,110 @@
+
+
+Fri Jul 11 20:49:21 2014
+Command line: TestDisk
+
+TestDisk 6.14, Data Recovery Utility, July 2013
+Christophe GRENIER <grenier@cgsecurity.org>
+http://www.cgsecurity.org
+OS: Linux, kernel 3.13.0-24-generic (#46-Ubuntu SMP Thu Apr 10 19:11:08 UTC 2014) x86_64
+Compiler: GCC 4.8
+Compilation date: 2013-10-29T01:29:29
+ext2fs lib: 1.42.9, ntfs lib: libntfs-3g, reiserfs lib: none, ewf lib: none
+/dev/sda: LBA, HPA, LBA48, DCO support
+/dev/sda: size       488397168 sectors
+/dev/sda: user_max   488397168 sectors
+/dev/sda: native_max 488397168 sectors
+/dev/sda: dco        488397168 sectors
+Warning: can't get size for Disk /dev/mapper/control - 0 B - 1 sectors, sector size=512
+Hard disk list
+Disk /dev/sda - 250 GB / 232 GiB - CHS 30401 255 63, sector size=512 - Samsung SSD 840 EVO 250GB, S/N:S1DBNSBDC22491N, FW:EXT0BB6Q
+Disk /dev/sdb - 1500 GB / 1397 GiB - CHS 182401 255 63, sector size=512 - WD Ext HDD 1021, FW:2002
+Disk /dev/sdd - 320 GB / 298 GiB - 625142448 sectors, sector size=512 - ST932032 0AS, FW:BS03
+
+Partition table type (auto): Intel
+Disk /dev/sdd - 320 GB / 298 GiB - ST932032 0AS
+Partition table type: Intel
+
+Interface Advanced
+Geometry from i386 MBR: head=1 sector=1
+check_part_i386 failed for partition type 07
+get_geometry_from_list_part_aux head=1 nbr=2
+ 1 P HPFS - NTFS                   63  625137343  625137281
+
+ntfs_boot_sector
+ 1 P HPFS - NTFS                   63  625137343  625137281
+filesystem size           6779790688894579039 1
+sectors_per_cluster       74 0
+mft_lcn                   17166209715927474169 0
+mftmirr_lcn               11661569371010191397 0
+clusters_per_mft_record   53 0
+clusters_per_index_record -121 0
+Boot sector
+Status: Bad
+
+Backup boot sector
+Status: Bad
+
+Sectors are not identical.
+
+A valid NTFS Boot sector must be present in order to access
+any data; even if the partition is not bootable.
+rebuild_NTFS_BS
+Search mft stopped:    1048576/625137281
+Failed to rebuild NTFS boot sector.
+
+ntfs_boot_sector
+ 1 P HPFS - NTFS                   63  625137343  625137281
+filesystem size           6779790688894579039 1
+sectors_per_cluster       74 0
+mft_lcn                   17166209715927474169 0
+mftmirr_lcn               11661569371010191397 0
+clusters_per_mft_record   53 0
+clusters_per_index_record -121 0
+Boot sector
+Status: Bad
+
+Backup boot sector
+Status: Bad
+
+Sectors are not identical.
+
+A valid NTFS Boot sector must be present in order to access
+any data; even if the partition is not bootable.
+NTFS signature is missing.
+NTFS signature is missing.
+NTFS signature is missing.
+NTFS signature is missing.
+Not an exFAT boot sector.
+
+ 1 P HPFS - NTFS                   63  625137343  625137281
+Can't open filesystem. Filesystem seems damaged.
+
+Interface Advanced
+Geometry from i386 MBR: head=1 sector=1
+check_part_i386 failed for partition type 07
+get_geometry_from_list_part_aux head=1 nbr=2
+ 1 P HPFS - NTFS                   63  625137343  625137281
+Not an exFAT boot sector.
+
+ 1 P HPFS - NTFS                   63  625137343  625137281
+Can't open filesystem. Filesystem seems damaged.
+
+ntfs_boot_sector
+ 1 P HPFS - NTFS                   63  625137343  625137281
+filesystem size           6779790688894579039 1
+sectors_per_cluster       74 0
+mft_lcn                   17166209715927474169 0
+mftmirr_lcn               11661569371010191397 0
+clusters_per_mft_record   53 0
+clusters_per_index_record -121 0
+Boot sector
+Status: Bad
+
+Backup boot sector
+Status: Bad
+
+Sectors are not identical.
+
+A valid NTFS Boot sector must be present in order to access
+any data; even if the partition is not bootable.

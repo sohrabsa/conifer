@@ -185,18 +185,59 @@ print(prop.part(tree, trees[c(1,2,3)]))
   # for all subtrees of a tree t
     # if (s == t) count.t ++
 
-
+all.sub.trees <- get.sub.trees(trees)
 counts <- list()
+tree <- trees[[5]]
 for (clade in subtrees(tree)) {
   index <- length(counts) + 1
-  counts[index] <- 0
+  counts[[index]] <- 0
   
   for (subtree in all.sub.trees) {
     if (all.equal(clade, subtree, use.edge.length = F)) {
-      counts[index] <- counts[index] + 1
+      counts[[index]] <- counts[[index]] + 1
     }
   }
 }
 
-counts
+counts <- unlist(counts)
 
+trees <- pbtree(n = 6, nsim = 10, scale = 1)
+
+t1 <- trees[[1]]
+t2 <- trees[[2]]
+# visualize, given two trees, write the clade support on them and then create plot
+par(mfrow=c(1,2))
+plot(t2)
+nodelabels()
+plot(t1, direction = "leftwards")
+
+# for each internal node
+s <- subtrees(t2)
+class(s) <- "multiPhylo"
+
+str(s[[1]])
+min(s[[1]]$node.label)
+plot(s[[1]])
+nodelabels()
+
+plot(t2)
+nodelabels(text=c("S"), node=c(7))
+nodelabels()
+
+# given counts, return the text and node arguments
+plot(tree)
+set.node.labels <- function(tree, counts) {
+  s <- unlist(lapply(subtrees(tree), function(t)  min(t$node.label)))
+  nodelabels(text=counts, node=s)
+}
+
+plot(t2)
+set.node.labels(tree, counts)
+
+plot.side.by.side <- function(tree1, tree2, counts) {
+  par(mfrow=c(1,2))
+  plot(tree1)
+  set.node.labels(tree1, counts)
+  plot(tree2, direction = "leftwards")
+  set.node.labels(tree2, counts)
+}
