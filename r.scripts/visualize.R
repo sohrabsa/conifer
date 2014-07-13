@@ -1,5 +1,6 @@
 ## S series figure
 library(ggplot2)
+install.packages("ggplot2")
 library(reshape2)
 library(coda)
 library(ggmcmc)
