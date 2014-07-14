@@ -1040,20 +1040,30 @@ ldata <- xmlToList(data)
 paths <- lapply(ldata, function(x) x['path'])
 #paths <- append(".", paths, after=0)
 classpaths <- paste0(paths, collapse = ":")
-
+classpaths <- gsub("/home/sohrab/conifer/build/libs/conifer.jar", "/home/sohrab/conifer/build/classes/main", classpaths)
 #setwd("~/conifer/")
 #system("gradle build")
 
-# only combile the changed class for now
+# only compile the changed class for now
 setwd("~/conifer/src/main/java/conifer")
-system(paste0("java -classpath ", classpaths, " TestPhyloModel.java"))
-classpaths <- gsub("/home/sohrab/conifer/build/libs/conifer.jar", "/home/sohrab/conifer/build/classes/main", classpaths)
-system("mv TestPhyloModel.class ../../../../build/classes/main/conifer/")
-setwd("/home/sohrab/conifer/build/classes/main")
+system(paste0("javac -classpath ", classpaths, " TestPhyloModel.java"))
+system("mv TestPhyloModel*.class ../../../../build/classes/main/conifer/")
+
+#setwd("/home/sohrab/conifer/build/classes/main")
+
+
+
+setwd("/home/sohrab/conifer/")
+
 
 # set the input values
 alignmentFilePath <- "/home/sohrab/conifer/src/main/resources/conifer/sampleInput/FES_4.fasta"
 initialTreeFilePath <- "/home/sohrab/conifer/src/main/resources/conifer/sampleInput/FES.ape.4.nwk"
 
 #classpaths <- gsub("/home/sohrab/conifer/build/libs/conifer.jar:", "", classpaths)
-system(paste0("java -classpath ", classpaths, " ", "conifer.TestPhyloModel", " -initialTreeFilePath", initialTreeFilePath, " -alignmentFile", alignmentFilePath))
+#res.path <- ":/home/sohrab/conifer/build/resources/main/conifer/sampleInput/"
+res.path <-""
+commandString <- paste0("java -classpath ", classpaths, res.path, " ", "conifer.TestPhyloModel", " --initialTreeFilePath '", initialTreeFilePath, "' --alignmentFilePath '", alignmentFilePath, "'")
+commandString
+system(commandString)
+                                                                                                                          
