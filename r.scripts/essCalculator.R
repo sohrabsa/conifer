@@ -12,7 +12,8 @@ library(lattice)
 
 
 
-"/home/sohrab/conifer/results/all/2014-07-12-11-36-46-GeyVzxr6.exec"
+
+input.dir <- "/home/sohrab/conifer/results/all/2014-07-12-11-36-46-GeyVzxr6.exec"
 
 
 calculateESS <- function(input.dir) {
@@ -38,7 +39,7 @@ calculateESS <- function(input.dir) {
       }
       
       colnames(l) <- c("ESS")
-      rownames(l) <- unlist(rowNamesList)
+      rownames(l) <- gsub(".csv", "", unlist(rowNamesList))
       write.csv(l, file.path(experiment, parameter.folder, "ess.txt"))
     }
   }

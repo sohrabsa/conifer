@@ -1,5 +1,5 @@
 # define functions
-setClass("mrbayesbatch", representation(lines="list"), 
+setClass("mrbayes", representation(lines="list"), 
          prototype(lines=list("begin mrbayes;", "end;")))
 setGeneric("getLines", function(object) standardGeneric("getLines"))
 setMethod("getLines", "mrbayesbatch", 
@@ -56,6 +56,7 @@ setReplaceMethod("dataFile", "mrbayesbatch", function(x, value) {
   x@lines <- append(x@lines, paste0("execute", " ", value, ";"), after=(length(x@lines) - 1))
   x
 })
+
 
 
 

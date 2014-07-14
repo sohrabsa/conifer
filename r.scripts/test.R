@@ -1027,3 +1027,33 @@ for (i in seq(10)) {
 q.strings <- unlist(lapply(unique(all.sub.trees), write.tree))
 
 data.frame(clades=q.strings, counts=counts)
+
+
+# run java class
+#java -classpath .:"/home/sohrab/.gradle/caches/modules-2/files-2.1/ca.ubc.stat/bayonet/2.3.0/6a0ebce8d7d5d7fd7623434cca738e775407695/bayonet-2.3.0.jar" conifer.TestPhyloModel
+
+# create class path from .classpath from eclipse
+require(XML)
+install.packages("XML")
+data <- xmlParse("~/conifer/.classpath")
+ldata <- xmlToList(data)
+paths <- lapply(ldata, function(x) x['path'])
+#paths <- append(".", paths, after=0)
+classpaths <- paste0(paths, collapse = ":")
+
+#setwd("~/conifer/")
+#system("gradle build")
+
+# only combile the changed class for now
+setwd("~/conifer/src/main/java/conifer")
+system(paste0("java -classpath ", classpaths, " TestPhyloModel.java"))
+classpaths <- gsub("/home/sohrab/conifer/build/libs/conifer.jar", "/home/sohrab/conifer/build/classes/main", classpaths)
+system("mv TestPhyloModel.class ../../../../build/classes/main/conifer/")
+setwd("/home/sohrab/conifer/build/classes/main")
+
+# set the input values
+alignmentFilePath <- "/home/sohrab/conifer/src/main/resources/conifer/sampleInput/FES_4.fasta"
+initialTreeFilePath <- "/home/sohrab/conifer/src/main/resources/conifer/sampleInput/FES.ape.4.nwk"
+
+#classpaths <- gsub("/home/sohrab/conifer/build/libs/conifer.jar:", "", classpaths)
+system(paste0("java -classpath ", classpaths, " ", "conifer.TestPhyloModel", " -initialTreeFilePath", initialTreeFilePath, " -alignmentFile", alignmentFilePath))
