@@ -1034,7 +1034,6 @@ data.frame(clades=q.strings, counts=counts)
 
 # create class path from .classpath from eclipse
 require(XML)
-install.packages("XML")
 data <- xmlParse("~/conifer/.classpath")
 ldata <- xmlToList(data)
 paths <- lapply(ldata, function(x) x['path'])
@@ -1060,10 +1059,9 @@ setwd("/home/sohrab/conifer/")
 alignmentFilePath <- "/home/sohrab/conifer/src/main/resources/conifer/sampleInput/FES_4.fasta"
 initialTreeFilePath <- "/home/sohrab/conifer/src/main/resources/conifer/sampleInput/FES.ape.4.nwk"
 
-#classpaths <- gsub("/home/sohrab/conifer/build/libs/conifer.jar:", "", classpaths)
-#res.path <- ":/home/sohrab/conifer/build/resources/main/conifer/sampleInput/"
-res.path <-""
-commandString <- paste0("java -classpath ", classpaths, res.path, " ", "conifer.TestPhyloModel", " --initialTreeFilePath '", initialTreeFilePath, "' --alignmentFilePath '", alignmentFilePath, "'")
+classpaths <- gsub("/home/sohrab/conifer/build/libs/conifer.jar:", "", classpaths)
+commandString <- paste0("java -classpath ", classpaths, " conifer.TestPhyloModel", " --initialTreeFilePath '", initialTreeFilePath, "' --alignmentFilePath '", alignmentFilePath, "'")
 commandString
-system(commandString)
+f <- system(commandString, intern = T)
+outputfolder <- gsub("outputFolder : ", "",  tail(f, n = 1))
                                                                                                                           

@@ -93,11 +93,10 @@ mrbayes.calculate.consensus.tree <- function(burn.in, thinning) {
   write.csv(d, "counsensus.clade.counts.csv", row.names=F)
   
   # write the consensus tree to the disk
+  # this will write clade support as [internal] node labels 
+  consensus.tree$node.label <- counts
   write.tree(consensus.tree, "consensus.tree")
 }
-
-
-
 
 
 mrbayes.driver.function <- function(tree.file.name, alignment.file.name) {

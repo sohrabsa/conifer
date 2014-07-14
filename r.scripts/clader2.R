@@ -61,7 +61,7 @@ get.count.for.tree <- function(tree, all.sub.trees) {
   unlist(counts)
 }
 set.node.labels <- function(tree, counts) {
-  s <- unlist(lapply(subtrees(tree), function(t)  min(t$node.label)))
+  s <- unlist(lapply(subtrees(tree), function(t) min(t$node.label)))
   nodelabels(text=counts, node=s)
 }
 
