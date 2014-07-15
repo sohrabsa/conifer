@@ -7,16 +7,17 @@ CONIFER_ESSPERSECOND_PATH <- ""
 CONIFER_PROJECT_DIR <- ""
 CONIFER_EXPERIMENT_PATH <- ""
 
-conifer.load.concensus.tree <- function() {
+
+conifer.load.consensus.tree <- function() {
   read.tree(CONIFER_CONSENSUS_TREE_PATH)
 }
 
 conifer.load.ess <- function() {
-  read.table(CONIFER_ESS_PATH)
+  read.csv(CONIFER_ESS_PATH, header = T, row.names=1)
 }
 
 conifer.load.esspersecond <- function() {
-  read.table(CONIFER_ESSPERSECOND_PATH)
+  read.csv(CONIFER_ESSPERSECOND_PATH, header = T, row.names=1)
 }
 
 
@@ -33,11 +34,11 @@ conifer.class.path.string <- function() {
 
 # compile and run conifer
 conifer.run <- function(alignmentFilePath, treeFilePath) {
-  classpath <- conifer.class.path.string()
+  classpaths <- conifer.class.path.string()
   
   # only compile the changed class for now)
   system(paste0("javac -classpath ", classpaths, " ", file.path(CONIFER_PROJECT_DIR, "src/main/java/conifer/TestPhyloModel.java")))
-  system(paste0("mv ", file.path(conifer.project.dir, "src/main/java/conifer/TestPhyloModel*.class"), " ",  file.path(conifer.project.dir, "/build/classes/main/conifer/"))
+  system(paste0("mv ", file.path(CONIFER_PROJECT_DIR, "src/main/java/conifer/TestPhyloModel*.class"), " ",  file.path(CONIFER_PROJECT_DIR, "/build/classes/main/conifer/")))
     
   classpaths <- gsub(file.path(CONIFER_PROJECT_DIR, "/build/libs/conifer.jar:"), "", classpaths)
   commandString <- paste0("java -classpath ", classpaths, " conifer.TestPhyloModel", " --initialTreeFilePath '", treeFilePath, "' --alignmentFilePath '", alignmentFilePath, "'")
@@ -45,13 +46,14 @@ conifer.run <- function(alignmentFilePath, treeFilePath) {
   f <- system(commandString, intern = T)
   outputfolder <- gsub("outputFolder : ", "",  tail(f, n = 1))
   CONIFER_EXPERIMENT_PATH <<- outputfolder
+  print(outputfolder)
   outputfolder
 }
 
 conifer.calculate.ESS <- function(input.dir) {
   # calculate ess perseconds
   experiment.files <- c(input.dir)
-  master.ess < - data.frame()
+  master.ess <- data.frame()
   for (experiment in experiment.files) {
     sub.folders <- list.files(experiment)
     sub.folders <- sub.folders[grepl("-csv", sub.folders)]
@@ -83,23 +85,25 @@ conifer.calculate.ESS <- function(input.dir) {
     }
   } 
   
-  #TODO
+  # combine different ESS in a master one
   CONIFER_ESS_PATH <<- file.path(input.dir, "master.ess.txt")
   CONIFER_ESSPERSECOND_PATH <<- file.path(input.dir, "master.ess.per.second.txt")
   write.csv(master.ess, CONIFER_ESS_PATH)
   master.ess[, 1] <- master.ess[, 1] / experiment.length.in.seconds
+  names(master.ess) <- gsub("ESS", "ESSPS", names(master.ess))
   write.csv(master.ess, CONIFER_ESSPERSECOND_PATH)
 }
 
 
 conifer.calculate.consensus.tree <- function(input.dir) {
-  file.names <- list.files(input.dir, pattern = "*.newick")
-  all.trees <- read.nexus(file.names[1])
+  file.names <- list.files(input.dir, pattern = "*.newick", full.names = T)
+  print(file.names[1])
+  all.trees <- read.tree(file.names[1])
   
   # no need to discard any trees, it's been already taken care of.
   
   # calculate the consensus tree
-  consensus.tree <- consensus(all.trees)
+  consensus.tree <- consensus(all.trees, p=.5)
   
   # calculate the clade support for the consensus tree
   all.sub.trees <- get.sub.trees(all.trees)

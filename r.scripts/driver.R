@@ -1,12 +1,12 @@
 # Benchmark scaffold
 
 #source("/Users/sohrab/Me/Apply/Canada Apply/Courses/Third Semester/conifer_fork/confier_fork/r.scripts/MrBayesBatch.R")
-mainDIR <- "/home/sohrab/conifer/r.scripts/"
+mainDIR <- "/home/sohrab/conifer_fork/r.scripts"
 source(file.path(mainDIR, "MrBayesBatch.R"))
-source(file.path(mainDIR, "clader.R"))
+source(file.path(mainDIR, "clader2.R"))
 source(file.path(mainDIR, "essGeneric.R"))
 source(file.path(mainDIR, "ConiferBenchmarking.R"))
-
+source(file.path(mainDIR, "MrBayesBenchmarking.R"))
 
 dataDir <- "/home/sohrab/conifer/src/main/resources/conifer/sampleInput"
 
@@ -57,11 +57,11 @@ driver <- function() {
   } else if (args[1] == "-h") {
     print("")
   } else {
-    
-  initial.tree.path <- args[1]
-  alignment.path <- args[2]
+    initial.tree.path <- args[1]
+    alignment.path <- args[2]
   
-  runner(alignment.path, initial.tree.path)
+    runner(alignment.path, initial.tree.path)
+  }
 }
 
 
@@ -76,7 +76,7 @@ runner <- function(alignment.path, initial.tree.path) {
   # 2. run mrbayes and conifer with the given inputs
   #   2.1. mrbayes
   #     2.1.1. run mrbayes with the inputs
-  mrbayes.driver.function(alignment.path, initial.tree.path, "/home/sohrab/conifer_fork/mrbayes")
+  mrbayes.driver.function(alignmentFilePath = alignment.path, treeFilePath = initial.tree.path, "/home/sohrab/conifer_fork/mrbayes")
   
   # TODO: check if mrbayes.driver.function worked
   
@@ -89,28 +89,37 @@ runner <- function(alignment.path, initial.tree.path) {
   #     2.2.2. parse the outputs of conifer and produce ESS, ESSperSec, consensus tree with clade support, and clade support csv
   #     2.2.3. create symlinks in the output folder
   
+  # create a symbolic link in conifer's directory
   mrbayes.make.symlink(conifer.output.dir)
   
   
   # 3. comparison
   #     3.1. ESS
   #       3.1.1. combined mrbayes and conifer ess data.frame
-  mrbayes.ess <- mrbayes.load.ess(mrbayes)
-  conifer.ess <- conifer.load.ess(conifer)
+  mrbayes.ess <- mrbayes.load.ess()
+  conifer.ess <- conifer.load.ess()
   ess <- combine.ess(mrbayes.ess, conifer.ess)
   #       3.1.2. barchart of mrbayes and conifer
-  make.ess.barchart(ess)
+  make.ess.barchart(ess, numberOfRuns = 1, conifer.output.dir)
   
+  
+
   
   #     3.2. ESSperSec
+  mrbayes.ess.persecond <- mrbayes.load.esspersecond()
+  conifer.ess.persecond <- conifer.load.esspersecond()
+  essPerSecond <- combine.ess(mrbayes.ess.persecond, conifer.ess.persecond)
+  make.ess.per.second.barchart(essPerSecond, 1, conifer.output.dir)
+  
+  
   
   #     3.3. consensus tree
   #       3.3.1. head to head graphs
   
   # load consensus trees
-  tree1 <- get.consensus.tree(mrbayes)
-  tree2 <- get.consensus.tree(conifer)
-  plot.side.by.side(tree1, tree2)
+  conifer.consensus.tree <- conifer.load.consensus.tree()
+  mrbayes.consensus.tree <- mrbayes.load.consensus.tree()
+  plot.side.by.side(conifer.consensus.tree, mrbayes.consensus.tree, c("Conifer", "MrBayes"), file.path(conifer.output.dir, "consensus.sidebyside.jpg") )
   
   
   #     3.4. clade support
@@ -120,15 +129,16 @@ runner <- function(alignment.path, initial.tree.path) {
   #
   
   # CLARIFY
-  }
 }
 
 
 #
+a <- "/home/sohrab/conifer/src/main/resources/conifer/sampleInput/FES_4.fasta"
+t <- "/home/sohrab/conifer/src/main/resources/conifer/sampleInput/FES.ape.4.nwk"
+  
+runner(a, t)
 
-runner("/home/sohrab/conifer/src/main/resources/conifer/sampleInput/FES_4.fasta", "/home/sohrab/conifer/src/main/resources/conifer/sampleInput/FES.ape.4.nwk")
-
-
+#conifer.output.dir <- conifer.driver.function(a, t, "/home/sohrab/conifer")
 
 
 #driver()

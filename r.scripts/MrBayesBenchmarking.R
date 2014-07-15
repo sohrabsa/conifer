@@ -8,7 +8,7 @@ MRBAYES_ESS_PATH <- ""
 MRBAYES_ESSPERSECOND_PATH <- ""
 MRBAYES_EXPERIMENT_PATH <- ""
 
-mrbayes.load.concensus.tree <- function() {
+mrbayes.load.consensus.tree <- function() {
   read.tree(MRBAYES_CONSENSUS_TREE_PATH)
 }
 
@@ -21,7 +21,7 @@ mrbayes.load.esspersecond <- function() {
 }
 
 mrbayes.make.symlink <- function(target.dir) {
-  system(paste0("ln -s ", MRBAYES_EXPERIMENT_PATH, " ", target.dir)
+  system(paste0("ln -s ", MRBAYES_EXPERIMENT_PATH, " ", target.dir))
 }
 
 
@@ -29,7 +29,7 @@ makeDataFileForMrBayes <- function(alignmentFile, treeFile) {
   if (file_ext(alignmentFile) != "nex") {
     # convert the alignment file from fasta to 
     alignment.nex.file <- paste0(file_path_sans_ext(alignmentFile), ".nex")
-    commandString <- paste("seqmagick convert --output-format nexus --alphabet dna", alignmentFile, alignment.nex.file)
+    commandString <- paste("seqmagick convert --output-format nexus --alphabet dna", alignmentFile, " ", alignment.nex.file)
     system(commandString)
     alignmentFile <- alignment.nex.file
   }
@@ -73,22 +73,19 @@ mrbayes.calculate.ESS <- function(elapsed.time) {
   ESS <- mrbayes.standardizeColumns.ESS(ESS)
   
   ESSPS <- effectiveSize(mrbayes.posterior)/elapsed.time
-  
+  names(ESSPS) <- names(ESS)
   # save the values
   MRBAYES_ESS_PATH <<- file.path(MRBAYES_EXPERIMENT_PATH, "ess.txt")
-  MRBAYES_ESSPERSECOND_PATH <- file.path(MRBAYES_EXPERIMENT_PATH, "ess_per_second.txt") 
+  MRBAYES_ESSPERSECOND_PATH <<- file.path(MRBAYES_EXPERIMENT_PATH, "ess_per_second.txt") 
   write.table(data.frame(ESS, check.names=F), MRBAYES_ESS_PATH)
   write.table(data.frame(ESSPS, check.names=F), MRBAYES_ESSPERSECOND_PATH)
 }
 
 # map column names from mrbayes's output to those from conifer
 mrbayes.standardizeColumns.ESS <- function(ESS) {
-  
-  b <- names(ESS)
   # change from r(A<->C) to q(A(0),C(0))
   names(ESS) <- gsub("r\\(", "q\\(", names(ESS))
   names(ESS) <- gsub("<->", ",", names(ESS))
-  names(ESS) <- gsub("([ACTG])", "\1(0)", names(ESS), perl = T)
   names(ESS) <- gsub("([ACTG])", "\\1(0)", names(ESS), perl = T)
   ESS
 }
@@ -105,7 +102,7 @@ mrbayes.calculate.consensus.tree <- function(burn.in, thinning) {
   N <- length(all.trees)
   
   # calculate the consensus tree
-  consensus.tree <- consensus(all.trees)
+  consensus.tree <- consensus(all.trees, p=.5)
 
   # calculate the clade support for the consensus tree
   all.sub.trees <- get.sub.trees(all.trees)
@@ -127,7 +124,7 @@ mrbayes.driver.function <- function(treeFilePath, alignmentFilePath, batch.dir) 
   currentWD <- getwd()
   # set dir where the mrbayes files should be placed
   MRBAYES_EXPERIMENT_PATH <<- file.path(batch.dir, format(Sys.time(), "%y-%m-%d-%H-%M-%S")) 
-  create.dir(MRBAYES_EXPERIMENT_PATH)
+  dir.create(MRBAYES_EXPERIMENT_PATH)
 
   setwd(MRBAYES_EXPERIMENT_PATH)
   batch.file.name <- "mbbatch.txt"
@@ -135,7 +132,7 @@ mrbayes.driver.function <- function(treeFilePath, alignmentFilePath, batch.dir) 
   system(paste0("ln -s ", alignmentFilePath, " ", MRBAYES_EXPERIMENT_PATH))
   system(paste0("ln -s ", treeFilePath, " ", MRBAYES_EXPERIMENT_PATH))
   
-  makeDataFileForMrBayes(alignmentFile=alignment.file.name, treeFile=tree.file.name)
+  makeDataFileForMrBayes(alignmentFile=alignmentFilePath, treeFile=treeFilePath)
   compileBatchScriptForMrBayes(data.file="datafile.nex", bath.script.file.name=batch.file.name)
   
   # get the elapsed time
@@ -158,6 +155,6 @@ mrbayes.driver.function <- function(treeFilePath, alignmentFilePath, batch.dir) 
 }
 
 
-mrbayes.driver.function("FES.ape.4.nwk", "FES_4.fasta")
+#mrbayes.driver.function("FES.ape.4.nwk", "FES_4.fasta")
 
 #consensus <- read.nexus("/Users/sohrab/Me/Apply/Canada\ Apply/Courses/Third\ Semester/conifer/extras/mrbayes/FES_8_batch.GTR.two/FES_8_batch.GTR.two.nex.tree1.con.tre")

@@ -251,14 +251,17 @@ all.sub.trees <<- get.sub.trees(trees)
 tree1 <- trees[[1]]
 tree2 <- trees[[2]]
 
-plot.side.by.side <- function(tree1, tree2) {
+plot.side.by.side <- function(tree1, tree2, names, plotPath) {
+  jpeg(plotPath, width=1250, height=460)
   par(mfrow=c(1,2))
-  plot(tree1)
+  plot(tree1, main=names[1])
   nodelabels(tree1$node.label)
   #set.node.labels(tree1, get.count.for.tree(tree1, all.sub.trees))
-  plot(tree2, direction = "leftwards")
+  plot(tree2, direction = "leftwards", main=names[2])
   nodelabels(tree2$node.label)
   #set.node.labels(tree2, get.count.for.tree(tree1, all.sub.trees))
+
+  dev.off()
 }
 
 add.support.to.tree <- function(tree, )
