@@ -5,6 +5,7 @@ mainDIR <- "/home/sohrab/conifer/r.scripts/"
 source(file.path(mainDIR, "MrBayesBatch.R"))
 source(file.path(mainDIR, "clader.R"))
 source(file.path(mainDIR, "essGeneric.R"))
+source(file.path(mainDIR, "ConiferBenchmarking.R"))
 
 
 dataDir <- "/home/sohrab/conifer/src/main/resources/conifer/sampleInput"
@@ -44,6 +45,7 @@ dataDir <- "/home/sohrab/conifer/src/main/resources/conifer/sampleInput"
 #       3.4.2. table with common clade, probability in both mrbayes and conifer
 #       3.4.3. over the same tips, head to head clades with highest probability
 #
+
 driver <- function() {
   # 1. parse the args for the input files
   #   1.1. read from stdin
@@ -59,6 +61,16 @@ driver <- function() {
   initial.tree.path <- args[1]
   alignment.path <- args[2]
   
+  runner(alignment.path, initial.tree.path)
+}
+
+
+runner <- function(alignment.path, initial.tree.path) {
+
+#  "/home/sohrab/conifer/src/main/resources/conifer/sampleInput/FES_4.fasta"
+#  "/home/sohrab/conifer/src/main/resources/conifer/sampleInput/FES.ape.4.nwk"  
+  
+  
   # TODO: validate inputs
   
   # 2. run mrbayes and conifer with the given inputs
@@ -73,9 +85,11 @@ driver <- function() {
     
   #   2.2 conifer
   #     2.2.1. run conifer with the inputs
-  conifer.driver.function(alignment.path, initial.tree.path, "/home/sohrab/conifer")
+  conifer.output.dir <- conifer.driver.function(alignment.path, initial.tree.path, "/home/sohrab/conifer")
   #     2.2.2. parse the outputs of conifer and produce ESS, ESSperSec, consensus tree with clade support, and clade support csv
   #     2.2.3. create symlinks in the output folder
+  
+  mrbayes.make.symlink(conifer.output.dir)
   
   
   # 3. comparison
@@ -110,9 +124,11 @@ driver <- function() {
 }
 
 
+#
+
+runner("/home/sohrab/conifer/src/main/resources/conifer/sampleInput/FES_4.fasta", "/home/sohrab/conifer/src/main/resources/conifer/sampleInput/FES.ape.4.nwk")
 
 
 
 
-
-driver()
+#driver()

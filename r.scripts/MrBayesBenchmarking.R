@@ -6,6 +6,7 @@ source(file.path(mainDIR, "clader2.R"))
 MRBAYES_CONSENSUS_TREE_PATH <- ""
 MRBAYES_ESS_PATH <- ""
 MRBAYES_ESSPERSECOND_PATH <- ""
+MRBAYES_EXPERIMENT_PATH <- ""
 
 mrbayes.load.concensus.tree <- function() {
   read.tree(MRBAYES_CONSENSUS_TREE_PATH)
@@ -17,6 +18,10 @@ mrbayes.load.ess <- function() {
 
 mrbayes.load.esspersecond <- function() {
   read.table(MRBAYES_ESSPERSECOND_PATH)
+}
+
+mrbayes.make.symlink <- function(target.dir) {
+  system(paste0("ln -s ", MRBAYES_EXPERIMENT_PATH, " ", target.dir)
 }
 
 
@@ -70,8 +75,10 @@ mrbayes.calculate.ESS <- function(elapsed.time) {
   ESSPS <- effectiveSize(mrbayes.posterior)/elapsed.time
   
   # save the values
-  write.table(data.frame(ESS, check.names=F), "ess.txt")
-  write.table(data.frame(ESSPS, check.names=F), "ess_per_second.txt")
+  MRBAYES_ESS_PATH <<- file.path(MRBAYES_EXPERIMENT_PATH, "ess.txt")
+  MRBAYES_ESSPERSECOND_PATH <- file.path(MRBAYES_EXPERIMENT_PATH, "ess_per_second.txt") 
+  write.table(data.frame(ESS, check.names=F), MRBAYES_ESS_PATH)
+  write.table(data.frame(ESSPS, check.names=F), MRBAYES_ESSPERSECOND_PATH)
 }
 
 # map column names from mrbayes's output to those from conifer
@@ -112,23 +119,21 @@ mrbayes.calculate.consensus.tree <- function(burn.in, thinning) {
   # write the consensus tree to the disk
   # this will write clade support as [internal] node labels 
   consensus.tree$node.label <- counts
-  write.tree(consensus.tree, "consensus.tree")
-  
-  MRBAYES_CONSENSUS_TREE_PATH <<- ""
+  MRBAYES_CONSENSUS_TREE_PATH <<- file.path(MRBAYES_EXPERIMENT_PATH, "consensus.tree")
+  write.tree(consensus.tree, MRBAYES_CONSENSUS_TREE_PATH)
 }
 
 mrbayes.driver.function <- function(treeFilePath, alignmentFilePath, batch.dir) {
   currentWD <- getwd()
   # set dir where the mrbayes files should be placed
-  
-  create.dir(file.path(batch.dir, ))
-  setwd(batch.dir)
-  
-  batch.file.name <- "july.compile.batch"
+  MRBAYES_EXPERIMENT_PATH <<- file.path(batch.dir, format(Sys.time(), "%y-%m-%d-%H-%M-%S")) 
+  create.dir(MRBAYES_EXPERIMENT_PATH)
 
+  setwd(MRBAYES_EXPERIMENT_PATH)
+  batch.file.name <- "mbbatch.txt"
   # make symbolik links to the data.files
-  system(paste0("ln -s ", alignmentFilePath, " ", batch.dir))
-  system(paste0("ln -s ", treeFilePath, " ", batch.dir))
+  system(paste0("ln -s ", alignmentFilePath, " ", MRBAYES_EXPERIMENT_PATH))
+  system(paste0("ln -s ", treeFilePath, " ", MRBAYES_EXPERIMENT_PATH))
   
   makeDataFileForMrBayes(alignmentFile=alignment.file.name, treeFile=tree.file.name)
   compileBatchScriptForMrBayes(data.file="datafile.nex", bath.script.file.name=batch.file.name)
@@ -148,6 +153,8 @@ mrbayes.driver.function <- function(treeFilePath, alignmentFilePath, batch.dir) 
   
   # restore to the current working directory
   setwd(currentWD)
+  
+  MRBAYES_EXPERIMENT_PATH
 }
 
 

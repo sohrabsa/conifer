@@ -5,6 +5,7 @@ require(XML)
 CONIFER_ESS_PATH <- ""
 CONIFER_ESSPERSECOND_PATH <- ""
 CONIFER_PROJECT_DIR <- ""
+CONIFER_EXPERIMENT_PATH <- ""
 
 conifer.load.concensus.tree <- function() {
   read.tree(CONIFER_CONSENSUS_TREE_PATH)
@@ -43,6 +44,7 @@ conifer.run <- function(alignmentFilePath, treeFilePath) {
   commandString
   f <- system(commandString, intern = T)
   outputfolder <- gsub("outputFolder : ", "",  tail(f, n = 1))
+  CONIFER_EXPERIMENT_PATH <<- outputfolder
   outputfolder
 }
 
@@ -128,5 +130,7 @@ conifer.driver.function <- function(treeFilePath, alignmentFilePath, conifer.pro
   conifer.calculate.ESS(output.folder)
   
   # calculate the concensus tree
-  conifer.calculate.consensus.tree(output.folder)  
+  conifer.calculate.consensus.tree(output.folder)
+  
+  CONIFER_EXPERIMENT_PATH
 }
