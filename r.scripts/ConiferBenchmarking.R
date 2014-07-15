@@ -1,35 +1,45 @@
 # conifer benchmarking
 require(XML)
 
+# SENSUS_TREE_PATH <- ""
+CONIFER_ESS_PATH <- ""
+CONIFER_ESSPERSECOND_PATH <- ""
+CONIFER_PROJECT_DIR <- ""
 
-conifer.class.path.string <- function(class.path.dir) {
+conifer.load.concensus.tree <- function() {
+  read.tree(CONIFER_CONSENSUS_TREE_PATH)
+}
+
+conifer.load.ess <- function() {
+  read.table(CONIFER_ESS_PATH)
+}
+
+conifer.load.esspersecond <- function() {
+  read.table(CONIFER_ESSPERSECOND_PATH)
+}
+
+
+conifer.class.path.string <- function() {
   # find class.path 
-  data <- xmlParse(file.path(class.path.dir, ".classpath"))
+  data <- xmlParse(file.path(CONIFER_PROJECT_DIR, ".classpath"))
   ldata <- xmlToList(data)
   paths <- lapply(ldata, function(x) x['path'])
   classpaths <- paste0(paths, collapse = ":")
   
   # TODO: fix paths
-  gsub("/home/sohrab/conifer/build/libs/conifer.jar", "/home/sohrab/conifer/build/classes/main", classpaths)
+  gsub(file.path(CONIFER_PROJECT_DIR, "/build/libs/conifer.jar"), file.path(CONIFER_PROJECT_DIR, "/build/classes/main"), classpaths)
 }
 
-# make conifer
-conifer.run <- function(conifer.project.dir, ) {
-
-  classpath <- conifer.class.path.string(conifer.project.dir)
+# compile and run conifer
+conifer.run <- function(alignmentFilePath, treeFilePath) {
+  classpath <- conifer.class.path.string()
   
   # only compile the changed class for now)
-  system(paste0("javac -classpath ", classpaths, " TestPhyloModel.java"))
-  system(paste0("mv ", file.path(conifer.project.dir, "home/sohrab/conifer/src/main/java/conifer/TestPhyloModel*.class"), " ",  file.path(conifer.project.dir, "/build/classes/main/conifer/"))
-  
-  setwd("/home/sohrab/conifer/")
-  
-  # set the input values
-  alignmentFilePath   <- file.path(conifer.project.dir, "/src/main/resources/conifer/sampleInput/FES_4.fasta")
-  initialTreeFilePath <- file.path(conifer.project.dir, "/src/main/resources/conifer/sampleInput/FES.ape.4.nwk")
-  
-  classpaths <- gsub("/home/sohrab/conifer/build/libs/conifer.jar:", "", classpaths)
-  commandString <- paste0("java -classpath ", classpaths, " conifer.TestPhyloModel", " --initialTreeFilePath '", initialTreeFilePath, "' --alignmentFilePath '", alignmentFilePath, "'")
+  system(paste0("javac -classpath ", classpaths, " ", file.path(CONIFER_PROJECT_DIR, "src/main/java/conifer/TestPhyloModel.java")))
+  system(paste0("mv ", file.path(conifer.project.dir, "src/main/java/conifer/TestPhyloModel*.class"), " ",  file.path(conifer.project.dir, "/build/classes/main/conifer/"))
+    
+  classpaths <- gsub(file.path(CONIFER_PROJECT_DIR, "/build/libs/conifer.jar:"), "", classpaths)
+  commandString <- paste0("java -classpath ", classpaths, " conifer.TestPhyloModel", " --initialTreeFilePath '", treeFilePath, "' --alignmentFilePath '", alignmentFilePath, "'")
   commandString
   f <- system(commandString, intern = T)
   outputfolder <- gsub("outputFolder : ", "",  tail(f, n = 1))
@@ -39,6 +49,7 @@ conifer.run <- function(conifer.project.dir, ) {
 conifer.calculate.ESS <- function(input.dir) {
   # calculate ess perseconds
   experiment.files <- c(input.dir)
+  master.ess < - data.frame()
   for (experiment in experiment.files) {
     sub.folders <- list.files(experiment)
     sub.folders <- sub.folders[grepl("-csv", sub.folders)]
@@ -64,10 +75,18 @@ conifer.calculate.ESS <- function(input.dir) {
       k2 <- k2[length(k2)]
       experiment.length.in.seconds <- as.numeric(gsub("Total time in minutes: ", "", k2)) * 60 
       write.csv(l, file.path(experiment, parameter.folder, "ess.txt"))
+      master.ess <- rbind(master.ess, l)
       l[, 1] <- l[, 1] / experiment.length.in.seconds
       write.csv(l, file.path(experiment, parameter.folder, "ess_per_second.txt"))
     }
   } 
+  
+  #TODO
+  CONIFER_ESS_PATH <<- file.path(input.dir, "master.ess.txt")
+  CONIFER_ESSPERSECOND_PATH <<- file.path(input.dir, "master.ess.per.second.txt")
+  write.csv(master.ess, CONIFER_ESS_PATH)
+  master.ess[, 1] <- master.ess[, 1] / experiment.length.in.seconds
+  write.csv(master.ess, CONIFER_ESSPERSECOND_PATH)
 }
 
 
@@ -92,21 +111,18 @@ conifer.calculate.consensus.tree <- function(input.dir) {
   # write the consensus tree to the disk
   # this will write clade support as [internal] node labels 
   consensus.tree$node.label <- counts
-  write.tree(consensus.tree, "consensus.tree")
+  CONIFER_CONSENSUS_TREE_PATH <<- file.path(input.dir, "consensus.tree")
+  write.tree(consensus.tree, CONIFER_CONSENSUS_TREE_PATH)
 }
 
+# sivhf300lfmvnGOGO
 
-conifer.driver.function <- function(tree.file.name, alignment.file.name) {
+conifer.driver.function <- function(treeFilePath, alignmentFilePath, conifer.project.dir) {
   # calculate ESS and ESS per second
-  batch.dir <- "/home/sohrab/conifer_fork/mrbayes"
-  setwd(batch.dir)
-  
-  batch.file.name <- "july.compile.batch"
-  alignment.file.name <- "FES_4.fasta"
-  tree.file.name <- "FES.ape.4.nwk"
+  CONIFER_PROJECT_DIR <<- conifer.project.dir
   
   # run conifer and return output directory
-  output.folder <- conifer.run()
+  output.folder <- conifer.run(treeFilePath, alignmentFilePath)
   
   # calculate ESS and ESS per second
   conifer.calculate.ESS(output.folder)

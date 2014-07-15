@@ -3,6 +3,23 @@ library(coda)
 source(file.path(mainDIR, "MrBayesBatch.R"))
 source(file.path(mainDIR, "clader2.R"))
 
+MRBAYES_CONSENSUS_TREE_PATH <- ""
+MRBAYES_ESS_PATH <- ""
+MRBAYES_ESSPERSECOND_PATH <- ""
+
+mrbayes.load.concensus.tree <- function() {
+  read.tree(MRBAYES_CONSENSUS_TREE_PATH)
+}
+
+mrbayes.load.ess <- function() {
+  read.table(MRBAYES_ESS_PATH)
+}
+
+mrbayes.load.esspersecond <- function() {
+  read.table(MRBAYES_ESSPERSECOND_PATH)
+}
+
+
 makeDataFileForMrBayes <- function(alignmentFile, treeFile) {
   if (file_ext(alignmentFile) != "nex") {
     # convert the alignment file from fasta to 
@@ -96,21 +113,22 @@ mrbayes.calculate.consensus.tree <- function(burn.in, thinning) {
   # this will write clade support as [internal] node labels 
   consensus.tree$node.label <- counts
   write.tree(consensus.tree, "consensus.tree")
+  
+  MRBAYES_CONSENSUS_TREE_PATH <<- ""
 }
 
-
-mrbayes.driver.function <- function(tree.file.name, alignment.file.name) {
-  # set dir where the mrbayes files should be placed  
-  batch.dir <- "/home/sohrab/conifer_fork/mrbayes"
+mrbayes.driver.function <- function(treeFilePath, alignmentFilePath, batch.dir) {
+  currentWD <- getwd()
+  # set dir where the mrbayes files should be placed
+  
+  create.dir(file.path(batch.dir, ))
   setwd(batch.dir)
   
   batch.file.name <- "july.compile.batch"
-  alignment.file.name <- "FES_4.fasta"
-  tree.file.name <- "FES.ape.4.nwk"
-  
+
   # make symbolik links to the data.files
-  system(paste0("ln -s ", file.path(dataDir, alignment.file.name), " ", batch.dir))
-  system(paste0("ln -s ", file.path(dataDir, tree.file.name), " ", batch.dir))
+  system(paste0("ln -s ", alignmentFilePath, " ", batch.dir))
+  system(paste0("ln -s ", treeFilePath, " ", batch.dir))
   
   makeDataFileForMrBayes(alignmentFile=alignment.file.name, treeFile=tree.file.name)
   compileBatchScriptForMrBayes(data.file="datafile.nex", bath.script.file.name=batch.file.name)
@@ -127,6 +145,9 @@ mrbayes.driver.function <- function(tree.file.name, alignment.file.name) {
   
   # keep record of the analysis time
   writeLines(c(paste("Analysis for ", batch.file.name, ", took", elapsed.time, "seconds.")), "experiment.details.txt")
+  
+  # restore to the current working directory
+  setwd(currentWD)
 }
 
 

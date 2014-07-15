@@ -9,23 +9,13 @@ source(file.path(mainDIR, "essGeneric.R"))
 
 dataDir <- "/home/sohrab/conifer/src/main/resources/conifer/sampleInput"
 
-
-# read the input and output fasta full paths from stdin
-args <- commandArgs(trailingOnly = TRUE)
-
-if (length(args) < 1) {
-  stop("Please provide the path to the experiment's directory.")
-} else if (args[1] == "-h") {
-  print("For every sub-dir with '-csv' in their name, will calculate ESS for every file with .csv extension and gather the results in an ess.txt file.")
-} else {
-  input.path <- args[1]
-  
-  calculateESS(input.path)
-  calculateESSperSecond(input.path)
-}
+# sample data files
+"/home/sohrab/conifer/src/main/resources/conifer/sampleInput/FES_4.fasta"
+"/home/sohrab/conifer/src/main/resources/conifer/sampleInput/FES.ape.4.nwk"  
 
 # compute and write the ess for each processable css file in the folder lists
-setwd("/Users/sohrab/Me/Apply/Canada Apply/Courses/Third Semester/conifer/results/all/")
+
+#setwd("/Users/sohrab/Me/Apply/Canada Apply/Courses/Third Semester/conifer/results/all/")
 
 
 # point of entry to the script
@@ -74,7 +64,7 @@ driver <- function() {
   # 2. run mrbayes and conifer with the given inputs
   #   2.1. mrbayes
   #     2.1.1. run mrbayes with the inputs
-  mrbayes <- mrbayes.driver.function(alignment.path, initial.tree.path)
+  mrbayes.driver.function(alignment.path, initial.tree.path, "/home/sohrab/conifer_fork/mrbayes")
   
   # TODO: check if mrbayes.driver.function worked
   
@@ -83,17 +73,16 @@ driver <- function() {
     
   #   2.2 conifer
   #     2.2.1. run conifer with the inputs
-  conifer <- conifer.driver.function(alignment.path, initial.tree.path)
+  conifer.driver.function(alignment.path, initial.tree.path, "/home/sohrab/conifer")
   #     2.2.2. parse the outputs of conifer and produce ESS, ESSperSec, consensus tree with clade support, and clade support csv
   #     2.2.3. create symlinks in the output folder
-  
   
   
   # 3. comparison
   #     3.1. ESS
   #       3.1.1. combined mrbayes and conifer ess data.frame
-  mrbayes.ess <- get.ess(mrbayes)
-  conifer.ess <- get.ess(conifer)
+  mrbayes.ess <- mrbayes.load.ess(mrbayes)
+  conifer.ess <- conifer.load.ess(conifer)
   ess <- combine.ess(mrbayes.ess, conifer.ess)
   #       3.1.2. barchart of mrbayes and conifer
   make.ess.barchart(ess)
