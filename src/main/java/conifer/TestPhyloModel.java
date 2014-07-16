@@ -3,9 +3,7 @@ package conifer;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+
 
 import org.apache.commons.io.FileUtils;
 
@@ -16,7 +14,6 @@ import blang.MCMCAlgorithm;
 import blang.MCMCFactory;
 import blang.annotations.DefineFactor;
 import blang.factors.IIDRealVectorGenerativeFactor;
-import blang.mcmc.Move;
 import blang.processing.Processor;
 import blang.processing.ProcessorContext;
 import briefj.BriefIO;
@@ -34,14 +31,12 @@ import conifer.models.MultiCategorySubstitutionModel;
 
 public class TestPhyloModel implements Runnable, Processor
 {
-	
-	
 	@Option
-	public File initialTreeFilePath;
+	public String initialTreeFilePath;
 	//= new File("/home/sohrab/conifer/src/main/resources/conifer/sampleInput/FES_4.fasta");
 
 	@Option
-	public File alignmentFile;
+	public String alignmentFilePath = "";
 	
 	@OptionSet(name = "factory")
 	public final MCMCFactory factory = new MCMCFactory();
@@ -51,10 +46,10 @@ public class TestPhyloModel implements Runnable, Processor
 		@DefineFactor(onObservations = true)
 		public final UnrootedTreeLikelihood<MultiCategorySubstitutionModel<ExpFamMixture>> likelihood = 
 		UnrootedTreeLikelihood
-		.fromFastaFile(alignmentFile)
+		.fromFastaFile(new File(alignmentFilePath))
 		.withExpFamMixture(ExpFamMixture.kimura1980())
 		//.withTree(new File("/home/sohrab/conifer/src/main/resources/conifer/sampleInput/FES.ape.4.nwk"));
-		.withTree(initialTreeFilePath);
+		.withTree(new File(initialTreeFilePath));
 		
 		@DefineFactor
 		NonClockTreePrior<RateParameterization> treePrior = 
@@ -83,8 +78,10 @@ public class TestPhyloModel implements Runnable, Processor
 	@Override
 	 public void run()
 	 {
+		logToFile("Over AlignmentFile:" + getAlignmentFile());
+		
 		factory.addProcessor(this);
-		factory.mcmcOptions.nMCMCSweeps = 100;
+		factory.mcmcOptions.nMCMCSweeps = 10000;
 		factory.mcmcOptions.burnIn = (int) Math.round(.1 * factory.mcmcOptions.nMCMCSweeps);
 		
 	    model = new Model();
@@ -104,7 +101,6 @@ public class TestPhyloModel implements Runnable, Processor
 		logToFile("MCMC thinningPeriod:\n" + factory.mcmcOptions.thinningPeriod);
 		logToFile("");
 		logToFile("Model:\n" + mcmc.model);
-	    
 	    
 	    mcmc.run();
 	    
@@ -132,12 +128,6 @@ public class TestPhyloModel implements Runnable, Processor
 	public static void main(String [] args) throws ClassNotFoundException, IOException
 	{
 		System.out.println("Running the new version...");
-		// TODO: remove this
-		for (int i = 0; i < args.length; i++) {
-			System.out.println(args[i]);	
-		}
-		
-		System.out.println(args.length);
 		
 //		args = new String[4];
 //		args[0] = "-initialTreeFilePath";
@@ -147,6 +137,13 @@ public class TestPhyloModel implements Runnable, Processor
 //		
 		//args = new String[1];
 		//args[0] = "-help";
+		
+		// TODO: remove this
+		for (int i = 0; i < args.length; i++) {
+			System.out.println(args[i]);	
+		}
+		
+		System.out.println(args.length);
 		
 		Mains.instrumentedRun(args, new TestPhyloModel());
 	}
@@ -164,6 +161,6 @@ public class TestPhyloModel implements Runnable, Processor
 	}
 
 	public String getAlignmentFile() {
-		return alignmentFile.getAbsolutePath();
+		return alignmentFilePath;
 	}
 }
