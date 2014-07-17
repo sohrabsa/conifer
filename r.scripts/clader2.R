@@ -65,12 +65,60 @@ set.node.labels <- function(tree, counts) {
   nodelabels(text=counts, node=s)
 }
 
-plot.side.by.side <- function(tree1, tree2) {
+plot.side.by.side <- function(tree1, tree2, names, plotPath) {
+  jpeg(plotPath, width=1250, height=460)
   par(mfrow=c(1,2))
-  plot(tree1)
+  plot(tree1, main=names[1])
   nodelabels(tree1$node.label)
   #set.node.labels(tree1, get.count.for.tree(tree1, all.sub.trees))
-  plot(tree2, direction = "leftwards")
+  plot(tree2, direction = "leftwards", main=names[2])
   nodelabels(tree2$node.label)
   #set.node.labels(tree2, get.count.for.tree(tree1, all.sub.trees))
+  
+  dev.off()
 }
+
+fastaPath <- "~/Downloads/trimmed.FES.fasta"
+# assumes unique tip.labels
+random.tree.from.fasta <- function(fastaPath) {
+  p <- readLines(fastaPath)
+
+  # choose lines that start with >
+  t <- p[grep(">.*", p)]
+  species.names <- gsub(">", "", t)
+  species.names
+  
+  tree <- rtree(length(species.names), rooted=F, tip.label = species.names)
+  outPath <- paste0(file_path_sans_ext(fastaPath), "_trimmed.nwk")
+  write.tree(tree, outPath)
+  
+  outPath
+}
+
+
+# keep only sequences for unique species
+trim.fasta.file <- function(fastaPath) {
+  p <- readLines(fastaPath)
+  p <- gsub(">[^|]+\\|[^|]+\\|[^|]+\\|[^|]+\\|\ (.*)\ isolate\ .*", ">\\1", p)
+  
+  ## remove duplicates
+  # species' names
+  t <- p[grep(">.*", p)]
+  s.i <- grep(">.*", p)
+  s.e <- c((s.i - 1)[-c(1)], length(s.i))
+  p[s.i[1]:s.e[1]]
+  p[s.i[2]:s.e[2]]
+  
+  duplicated <- unlist(lapply(which(duplicated(t)), function(x)  s.i[x]:s.e[x]))
+  
+  p <- p[-(duplicated)]
+  
+  
+  writeLines(p, paste0(file_path_sans_ext(fastaPath), "_trimmed.fasta"))
+}
+
+
+fastaPath <- "/home/sohrab/Downloads/FES_full.fasta"
+fastaPath <- "/home/sohrab/Downloads/UTY_full.fasta"
+
+#trim.fasta.file(fastaPath)

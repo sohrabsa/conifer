@@ -23,7 +23,17 @@ conifer.load.esspersecond <- function() {
 
 conifer.class.path.string <- function() {
   # find class.path 
-  data <- xmlParse(file.path(CONIFER_PROJECT_DIR, ".classpath"))
+  classPath <- file.path(CONIFER_PROJECT_DIR, ".classpath")
+  if (!file.exists(classPath)) {
+    # try building the project
+    c <- getwd()
+    setwd(CONIFER_PROJECT_DIR)
+    system("gradle build")
+    system("gradle eclipse")
+    setwd(c)
+  }
+  
+  data <- xmlParse(classPath)
   ldata <- xmlToList(data)
   paths <- lapply(ldata, function(x) x['path'])
   classpaths <- paste0(paths, collapse = ":")

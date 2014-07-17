@@ -1,5 +1,5 @@
 # Benchmark scaffold
-
+library(methods)
 #source("/Users/sohrab/Me/Apply/Canada Apply/Courses/Third Semester/conifer_fork/confier_fork/r.scripts/MrBayesBatch.R")
 mainDIR <- "/home/sohrab/conifer_fork/r.scripts"
 source(file.path(mainDIR, "MrBayesBatch.R"))
@@ -50,28 +50,80 @@ driver <- function() {
   # 1. parse the args for the input files
   #   1.1. read from stdin
   # read the input and output fasta full paths from stdin
+  
+  supportedArguments <- names(formals(runner))
+  
+  arg.desc <- list(model=paste0("Phylogenetic Model to use, could be one of the following: ",
+                                paste0(mrbayes.possible.models(), collapse = ", "), 
+                                ". Default value: ", formals(runner)$model),
+                   numofgen=paste0("Number of MCMC sweeps. ",
+                                   "Default value: ", formals(runner)$numofgen),
+                   thinning=paste0("How often keep the samples. ",
+                                   "Default value: ", formals(runner)$thinning),
+                   burnin=paste0("Number of samples of initial samples to discard. ",
+                                 "Default value: ", "numofgen * 0.1"),
+                   initialTreePath=paste0("Path to the initla tree. Should be in Newick format.",
+                                          "Default value: Creates a random tree if not set.", formals(runner)$initialTreePath),
+                   alignmentPath=paste0("Path to the sequence alignment file in fasta format. ",
+                                        "Default value: ", formals(runner)$alignmentPath),
+                   coniferProjectDir=paste0("Root directory of your conifer repository. Will try to expand the given path. ",
+                                            "Default value: ", eval(formals(runner)$coniferProjectDir))
+  )
+  
+  # read std input
   args <- commandArgs(trailingOnly = TRUE)
   
   if (length(args) < 1) {
     stop("Please provide the path to the initial tree, and alignment file.")
   } else if (args[1] == "-h") {
-    print("")
+    cat("Input arguments are as follows:\n")
+    #cat(paste0(names(arg.desc), ":\t\t", arg.desc, collapse="\n "), "\n")
+    formatting <- unlist(lapply(names(arg.desc), function(x) paste0(rep("+", 60 - nchar(x)), collapse="") ))
+    t <- paste0(formatting, names(arg.desc), " : ", arg.desc, collapse="\n")
+    #cat(paste0(formatting, names(arg.desc), " : ", arg.desc, collapse="\n"), "\n")
+    t <- strsplit(t, "\n")[[1]]
+    #cat(paste0(t, collapse="\n"), "\n")
+    t <- gsub("\\+", " ", paste0(strwrap(t, exdent = 63, width=130), collapse="\n"))
+    cat(t, "\n")
   } else {
-    initial.tree.path <- args[1]
-    alignment.path <- args[2]
-  
-    runner(alignment.path, initial.tree.path)
+    # parse command-line switches
+
+    switches <- gr(ep)("") args[seq(1, length(args), 2)]
+    
+    print(switches)
+    if (!all(switches %in% supportedArguments)) stop("Unrecognized argument!")
+    # TODO: further check the input values
+    arg.list <- list(args[seq(2,length(args), 2)])
+    names(arg.list) <- switches
+    
+    print(arg.list$model)
+    if (length(grep("alignmentPath", switches)) == 0) stop("Empty alignmentPath. Alignment file has to be provided.")
+    if (! arg.list$model %in% mrbayes.possible.models()) stop(paste0("Don't support provided model ", arg.list$model), "yet.")
+    
+    
+    #do.call(runner, arg.list)
   }
 }
 
 
-runner <- function(alignment.path, initial.tree.path) {
+runner <- function(model = "GTR", 
+                   numofgen=10000, 
+                   thinning=10, 
+                   burnin=as.integer(numofgen*.1), 
+                   initialTreePath=NULL, 
+                   alignmentPath=NULL, 
+                   coniferProjectDir=file.path("~", system('whoami', intern=TRUE), "conifer")) {
 
 #  "/home/sohrab/conifer/src/main/resources/conifer/sampleInput/FES_4.fasta"
 #  "/home/sohrab/conifer/src/main/resources/conifer/sampleInput/FES.ape.4.nwk"  
   
   
   # TODO: validate inputs
+  # handle a NULL tree
+  if (is.null(initialTreePath)) {
+    initialTreePath <- random.tree.from.fasta(alignmentPath)
+  }
+  
   
   # 2. run mrbayes and conifer with the given inputs
   #   2.1. mrbayes
@@ -119,7 +171,7 @@ runner <- function(alignment.path, initial.tree.path) {
   # load consensus trees
   conifer.consensus.tree <- conifer.load.consensus.tree()
   mrbayes.consensus.tree <- mrbayes.load.consensus.tree()
-  plot.side.by.side(conifer.consensus.tree, mrbayes.consensus.tree, c("Conifer", "MrBayes"), file.path(conifer.output.dir, "consensus.sidebyside.jpg") )
+  plot.side.by.side(conifer.consensus.tree, mrbayes.consensus.tree, c("Conifer", "MrBayes"), file.path(conifer.output.dir, "consensus.sidebyside.jpg"))
   
   
   #     3.4. clade support
@@ -133,12 +185,14 @@ runner <- function(alignment.path, initial.tree.path) {
 
 
 #
+# TODO: use full data set
+#/home/sohrab/conifer_fork/src/main/resources/conifer/sampleInput/UTY_full_trimmed.nwk
 a <- "/home/sohrab/conifer/src/main/resources/conifer/sampleInput/FES_4.fasta"
 t <- "/home/sohrab/conifer/src/main/resources/conifer/sampleInput/FES.ape.4.nwk"
   
-runner(a, t)
+#runner(a, t)
 
 #conifer.output.dir <- conifer.driver.function(a, t, "/home/sohrab/conifer")
 
 
-#driver()
+driver()

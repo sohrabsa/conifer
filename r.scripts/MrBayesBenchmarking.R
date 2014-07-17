@@ -44,15 +44,63 @@ makeDataFileForMrBayes <- function(alignmentFile, treeFile) {
 }
 
 
-compileBatchScriptForMrBayes <- function(data.file, bath.script.file.name) {
+# source: e.g. look at:
+# http://mrbayes.sourceforge.net/wiki/index.php/Evolutionary_Models_Implemented_in_MrBayes_3
+# http://bodegaphylo.wikispot.org/MrBayes_Tutorial_(Brown)
+# Assumption: ALL SITE RATES ARE EQUAL
+# create different phylogenetic models: (rate matrix madules)
+# according to Probabilistic Graphical Model Representation in Phylogenetics Hohna et al., 2013
+# 1. Jukes-Cantor (JC69): all exchangability rates and base frequencie are equal. -> free parameter \mu
+# 2. Flenstein (F81): equal exchangability rates but different base frequencies drawn from a dirichlet -> free parameters \mu and \pi_1 ... \pi_4  
+# 3. Hasegawa (HKY85): different transition transversion valuse and base frequencies drawn from a dirichlet -> freee parameters: \kappa
+# 4. Kimura (K80): base different transition tranversion value but equal base frequencies -> free parameter -> \kappa
+# 5. GTR (Tavare 86): base (stationary) drawn from a dirichlet as well as the exchangability rates -> free parapeters -> \alpha and \beta for the dirichlet
+
+# Kappa for mrbayes and branch lengths: http://hydrodictyon.eeb.uconn.edu/eebedia/index.php/Phylogenetics:_MrBayes_Lab
+# TL is sum of all branch lengths
+# LnL is the log likelihood of the cold chain
+
+mrbayes.possible.models <- function() c("JC69", "F81", "HKY85", "K80", "GTR")
+
+# @model: could be in c("JC69", "F81", "HKY85", "K80", "GTR)
+compileBatchScriptForMrBayes <- function(data.file, bath.script.file.name, model="JC69", thinning = 10, burn.in = 1000, ngenerations = 10000) {
   mrbayes <- new("mrbayesbatch")
   setTags(mrbayes) <- list(command="set", list=list(autoclose="yes", nowarn="yes"))
   addMultiPartCommand(mrbayes) <- (list("execute", data.file))
+  
+  # set the start values to be read from the provided initial tree
   setTags(mrbayes) <- list(command="startvals", list=list(tau="mm", V="mm"))
-  setTags(mrbayes) <- list(command="lset", list=list(nst=6, rates="Equal"))
-  setTags(mrbayes) <- list(command="mcmc", list=list(ngen=10000, samplefreq="10"))
-  setTags(mrbayes) <- list(command="sump", list=list(burnin=1000))
-  setTags(mrbayes) <- list(command="sumt", list=list(burnin=1000))
+  
+  # setup the model
+  switch(model, 
+         JC69={ ##
+           # equal exchangaiblity rates, no among-site rate variation
+           setTags(mrbayes) <- list(command="lset", list=list(nst=1, rates="Equal"))
+           
+           # equal & fixed base (state) frequencies
+           setTags(mrbayes) <- list(command="prset", list=list(statefreqpr="fixed(equal)"))
+         }, 
+         F81={ ##
+           setTags(mrbayes) <- list(command="lset", list=list(nst=1, rates="Equal"))
+         },
+         HKY85={ ##
+           setTags(mrbayes) <- list(command="lset", list=list(nst=2, rates="Equal"))
+         },
+         K80={ ##
+           setTags(mrbayes) <- list(command="lset", list=list(nst=2, rates="Equal"))
+           setTags(mrbayes) <- list(command="prset", list=list(statefreqpr="fixed(equal)"))
+         },
+         GTR={
+           setTags(mrbayes) <- list(command="lset", list=list(nst=6, rates="Equal"))
+         },
+         {
+           cat("Model ", model, " isn't supported yet.")
+         }
+  )
+  
+  setTags(mrbayes) <- list(command="mcmc", list=list(ngen=ngenerations, samplefreq=thinning))
+  setTags(mrbayes) <- list(command="sump", list=list(burnin=burn.in))
+  setTags(mrbayes) <- list(command="sumt", list=list(burnin=burn.in))
   writeToDisk(mrbayes, bath.script.file.name)  
 }
 
@@ -120,14 +168,17 @@ mrbayes.calculate.consensus.tree <- function(burn.in, thinning) {
   write.tree(consensus.tree, MRBAYES_CONSENSUS_TREE_PATH)
 }
 
+
 mrbayes.driver.function <- function(treeFilePath, alignmentFilePath, batch.dir) {
   currentWD <- getwd()
+  
   # set dir where the mrbayes files should be placed
-  MRBAYES_EXPERIMENT_PATH <<- file.path(batch.dir, format(Sys.time(), "%y-%m-%d-%H-%M-%S")) 
+  MRBAYES_EXPERIMENT_PATH <<- file.path(batch.dir, format(Sys.time(), "mrbayes-%y-%m-%d-%H-%M-%S")) 
   dir.create(MRBAYES_EXPERIMENT_PATH)
 
   setwd(MRBAYES_EXPERIMENT_PATH)
   batch.file.name <- "mbbatch.txt"
+  
   # make symbolik links to the data.files
   system(paste0("ln -s ", alignmentFilePath, " ", MRBAYES_EXPERIMENT_PATH))
   system(paste0("ln -s ", treeFilePath, " ", MRBAYES_EXPERIMENT_PATH))
