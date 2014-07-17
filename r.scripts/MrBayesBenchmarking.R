@@ -63,7 +63,12 @@ makeDataFileForMrBayes <- function(alignmentFile, treeFile) {
 mrbayes.possible.models <- function() c("JC69", "F81", "HKY85", "K80", "GTR")
 
 # @model: could be in c("JC69", "F81", "HKY85", "K80", "GTR)
-compileBatchScriptForMrBayes <- function(data.file, bath.script.file.name, model="JC69", thinning = 10, burn.in = 1000, ngenerations = 10000) {
+compileBatchScriptForMrBayes <- function(data.file, 
+                                         bath.script.file.name, 
+                                         model="JC69", 
+                                         thinning = 10, 
+                                         burn.in = 1000, 
+                                         ngenerations = 10000) {
   mrbayes <- new("mrbayesbatch")
   setTags(mrbayes) <- list(command="set", list=list(autoclose="yes", nowarn="yes"))
   addMultiPartCommand(mrbayes) <- (list("execute", data.file))
@@ -113,7 +118,8 @@ mrbayes.analysis <- function(batch.script) {
 mrbayes.calculate.ESS <- function(elapsed.time) {
   file.names <- list.files(".", pattern = "*.run1.p")
   mrbayes.posterior <- read.table(file.names[1], skip=1, header=T, check.names=F)
-  mrbayes.posterior <- mrbayes.posterior[, c(3:9)]
+  
+  mrbayes.posterior <- mrbayes.posterior[, c(3:ncol(mrbayes.posterior))]
   
   ESS <- effectiveSize(mrbayes.posterior)
   
@@ -129,12 +135,17 @@ mrbayes.calculate.ESS <- function(elapsed.time) {
   write.table(data.frame(ESSPS, check.names=F), MRBAYES_ESSPERSECOND_PATH)
 }
 
+# http://hydrodictyon.eeb.uconn.edu/eebedia/index.php/Phylogenetics:_MrBayes_Lab
 # map column names from mrbayes's output to those from conifer
 mrbayes.standardizeColumns.ESS <- function(ESS) {
-  # change from r(A<->C) to q(A(0),C(0))
-  names(ESS) <- gsub("r\\(", "q\\(", names(ESS))
-  names(ESS) <- gsub("<->", ",", names(ESS))
-  names(ESS) <- gsub("([ACTG])", "\\1(0)", names(ESS), perl = T)
+  
+  n <- names(ESS)
+  # # change from r(A<->C) to q(A(0),C(0))
+  indexes <- grep("r\\([ACTG]<->[ACTG]\\)", n)
+  n[indexes] <- gsub("r\\(", "q\\(", n[indexes])
+  n[indexes] <- gsub("<->", ",", n[indexes])
+  n[indexes] <- gsub("([ACTG])", "\\1(0)", n[indexes], perl=T)
+  names(ESS) <- n
   ESS
 }
 
@@ -169,7 +180,8 @@ mrbayes.calculate.consensus.tree <- function(burn.in, thinning) {
 }
 
 
-mrbayes.driver.function <- function(treeFilePath, alignmentFilePath, batch.dir) {
+mrbayes.driver.function <- function(treeFilePath, alignmentFilePath, batch.dir, model, thinning, burn.in, numofgen) {
+  print(deparse(match.call()))
   currentWD <- getwd()
   
   # set dir where the mrbayes files should be placed
@@ -184,7 +196,12 @@ mrbayes.driver.function <- function(treeFilePath, alignmentFilePath, batch.dir) 
   system(paste0("ln -s ", treeFilePath, " ", MRBAYES_EXPERIMENT_PATH))
   
   makeDataFileForMrBayes(alignmentFile=alignmentFilePath, treeFile=treeFilePath)
-  compileBatchScriptForMrBayes(data.file="datafile.nex", bath.script.file.name=batch.file.name)
+  compileBatchScriptForMrBayes(data.file="datafile.nex", 
+                               bath.script.file.name=batch.file.name, 
+                               model=model, 
+                               thinning=thinning, 
+                               burn.in=burn.in, 
+                               ngenerations=numofgen)
   
   # get the elapsed time
   the.run.time <- system.time(mrbayes.analysis(batch.file.name))

@@ -38,6 +38,18 @@ public class TestPhyloModel implements Runnable, Processor
 	@Option
 	public String alignmentFilePath = "";
 	
+	@Option
+	public int nMCMCSweeps = 1000;
+	
+	@Option
+	public int burnIn = (int) Math.round(.1 * nMCMCSweeps);
+	
+	@Option
+	public int thinningPeriod = 10;
+	
+	@Option
+	public String phyloModel = "GTR";
+	
 	@OptionSet(name = "factory")
 	public final MCMCFactory factory = new MCMCFactory();
 	
@@ -68,6 +80,10 @@ public class TestPhyloModel implements Runnable, Processor
 		.iidNormalOn(likelihood.evolutionaryModel.rateMatrixMixture.parameters);		
 	}
 	
+	// we can build different models here and instantiate them according to the input parameter
+	// in the run block.
+	
+	
 	// Note: only instantiate this in run to avoid problems with command line argument parsing
 	public Model model;
 	
@@ -78,18 +94,21 @@ public class TestPhyloModel implements Runnable, Processor
 	@Override
 	 public void run()
 	 {
+		System.out.println("Running the newest version...");
+		
 		logToFile("Over AlignmentFile:" + getAlignmentFile());
 		
 		factory.addProcessor(this);
-		factory.mcmcOptions.nMCMCSweeps = 10000;
-		factory.mcmcOptions.burnIn = (int) Math.round(.1 * factory.mcmcOptions.nMCMCSweeps);
+		factory.mcmcOptions.nMCMCSweeps = nMCMCSweeps;
+		factory.mcmcOptions.burnIn = burnIn;
+		factory.mcmcOptions.thinningPeriod = thinningPeriod;
 		
 	    model = new Model();
 	    MCMCAlgorithm mcmc = factory.build(model, false);
 	    System.out.println(mcmc.model);
 	    
 	    long startTime = System.currentTimeMillis();
-		String excluding = "Simple";
+		String excluding = "GTR-AllMoves";
 
 		// log experiment information
 		logToFile("Experiment Title:" + excluding);
@@ -127,7 +146,7 @@ public class TestPhyloModel implements Runnable, Processor
 	
 	public static void main(String [] args) throws ClassNotFoundException, IOException
 	{
-		System.out.println("Running the new version...");
+		System.out.println("Running the newest version...");
 		
 //		args = new String[4];
 //		args[0] = "-initialTreeFilePath";

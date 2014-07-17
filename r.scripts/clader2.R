@@ -78,7 +78,7 @@ plot.side.by.side <- function(tree1, tree2, names, plotPath) {
   dev.off()
 }
 
-fastaPath <- "~/Downloads/trimmed.FES.fasta"
+
 # assumes unique tip.labels
 random.tree.from.fasta <- function(fastaPath) {
   p <- readLines(fastaPath)
@@ -88,11 +88,11 @@ random.tree.from.fasta <- function(fastaPath) {
   species.names <- gsub(">", "", t)
   species.names
   
-  tree <- rtree(length(species.names), rooted=F, tip.label = species.names)
-  outPath <- paste0(file_path_sans_ext(fastaPath), "_trimmed.nwk")
-  write.tree(tree, outPath)
+  tree <- rtree(length(species.names), rooted=F, tip.label=species.names)
+  outputFile <- paste0(file_path_sans_ext(fastaPath), ".nwk")
+  write.tree(tree, outputFile)
   
-  outPath
+  outputFile
 }
 
 
@@ -118,7 +118,13 @@ trim.fasta.file <- function(fastaPath) {
 }
 
 
-fastaPath <- "/home/sohrab/Downloads/FES_full.fasta"
-fastaPath <- "/home/sohrab/Downloads/UTY_full.fasta"
+#fastaPath <- "/home/sohrab/Downloads/FES_full.fasta"
+#fastaPath <- "/home/sohrab/Downloads/UTY_full.fasta"
 
 #trim.fasta.file(fastaPath)
+
+#fastaPath <- "/home/sohrab/Downloads/FES_full_trimmed.fasta"
+#fastaPath <- "/home/sohrab/Downloads/UTY_full_trimmed.fasta"
+#random.tree.from.fasta(fastaPath)
+
+#/home/sohrab/conifer_fork/src/main/resources/conifer/sampleInput/UTY_full_trimmed.nwk

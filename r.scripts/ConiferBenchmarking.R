@@ -43,20 +43,32 @@ conifer.class.path.string <- function() {
 }
 
 # compile and run conifer
-conifer.run <- function(alignmentFilePath, treeFilePath) {
+conifer.run <- function(alignmentFilePath, treeFilePath, thinning, burn.in, numofgen, model) {
   classpaths <- conifer.class.path.string()
   
+  t <- getwd()
+  setwd(file.path(CONIFER_PROJECT_DIR, "src/main/java/conifer"))
+  print(file.path(CONIFER_PROJECT_DIR, "src/main/java/conifer"))
+  cat("Warning! Ignoring model for the time being! NOT IMPLEMENTED IN CONIFER SIDE!\n")
+  
   # only compile the changed class for now)
-  system(paste0("javac -classpath ", classpaths, " ", file.path(CONIFER_PROJECT_DIR, "src/main/java/conifer/TestPhyloModel.java")))
+  system(paste0("javac", " -classpath ", classpaths, " ", "TestPhyloModel.java"))
   system(paste0("mv ", file.path(CONIFER_PROJECT_DIR, "src/main/java/conifer/TestPhyloModel*.class"), " ",  file.path(CONIFER_PROJECT_DIR, "/build/classes/main/conifer/")))
     
   classpaths <- gsub(file.path(CONIFER_PROJECT_DIR, "/build/libs/conifer.jar:"), "", classpaths)
-  commandString <- paste0("java -classpath ", classpaths, " conifer.TestPhyloModel", " --initialTreeFilePath '", treeFilePath, "' --alignmentFilePath '", alignmentFilePath, "'")
+  commandString <- paste0("java", " -classpath ", classpaths, " conifer.TestPhyloModel",
+                          " --initialTreeFilePath '", treeFilePath,
+                          "' --alignmentFilePath '", alignmentFilePath, "'", 
+                          " --nMCMCSweeps ", numofgen,
+                          " --burnIn ", burn.in, 
+                          " --thinningPeriod ", thinning)
   commandString
+  setwd(CONIFER_PROJECT_DIR)
   f <- system(commandString, intern = T)
+  setwd(t)
   outputfolder <- gsub("outputFolder : ", "",  tail(f, n = 1))
   CONIFER_EXPERIMENT_PATH <<- outputfolder
-  print(outputfolder)
+  cat("Results may be accessed in ", outputfolder, "\n")
   outputfolder
 }
 
@@ -107,7 +119,7 @@ conifer.calculate.ESS <- function(input.dir) {
 
 conifer.calculate.consensus.tree <- function(input.dir) {
   file.names <- list.files(input.dir, pattern = "*.newick", full.names = T)
-  print(file.names[1])
+  #print(file.names[1])
   all.trees <- read.tree(file.names[1])
   
   # no need to discard any trees, it's been already taken care of.
@@ -133,13 +145,13 @@ conifer.calculate.consensus.tree <- function(input.dir) {
 
 # sivhf300lfmvnGOGO
 
-conifer.driver.function <- function(treeFilePath, alignmentFilePath, conifer.project.dir) {
+conifer.driver.function <- function(treeFilePath, alignmentFilePath, conifer.project.dir, thinning, burn.in, numofgen, model) {
   # calculate ESS and ESS per second
   CONIFER_PROJECT_DIR <<- conifer.project.dir
   
   # run conifer and return output directory
-  output.folder <- conifer.run(treeFilePath, alignmentFilePath)
-  
+  output.folder <- conifer.run(treeFilePath, alignmentFilePath, thinning = thinning, burn.in=burn.in, numofgen=numofgen, model=model)
+
   # calculate ESS and ESS per second
   conifer.calculate.ESS(output.folder)
   

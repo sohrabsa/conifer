@@ -67,7 +67,9 @@ driver <- function() {
                    alignmentPath=paste0("Path to the sequence alignment file in fasta format. ",
                                         "Default value: ", formals(runner)$alignmentPath),
                    coniferProjectDir=paste0("Root directory of your conifer repository. Will try to expand the given path. ",
-                                            "Default value: ", eval(formals(runner)$coniferProjectDir))
+                                            "Default value: ", eval(formals(runner)$coniferProjectDir)),
+                   mrbayesOutputDir=paste0("Where to create subdirectories with mrbayes outputs. ", 
+                                           "Default value: ", eval(formals(runner)$mrbayesOutputDir))
   )
   
   # read std input
@@ -88,20 +90,18 @@ driver <- function() {
   } else {
     # parse command-line switches
 
-    switches <- gr(ep)("") args[seq(1, length(args), 2)]
+    switches <- gsub("(-|--)", "", args[seq(1, length(args), 2)]) 
     
-    print(switches)
     if (!all(switches %in% supportedArguments)) stop("Unrecognized argument!")
     # TODO: further check the input values
-    arg.list <- list(args[seq(2,length(args), 2)])
+    arg.indexes <- seq(2,length(args), 2)
+    arg.list <- as.list(args[arg.indexes])
     names(arg.list) <- switches
     
-    print(arg.list$model)
     if (length(grep("alignmentPath", switches)) == 0) stop("Empty alignmentPath. Alignment file has to be provided.")
-    if (! arg.list$model %in% mrbayes.possible.models()) stop(paste0("Don't support provided model ", arg.list$model), "yet.")
-    
-    
-    #do.call(runner, arg.list)
+    if (!is.null(arg.list$model) && ! arg.list$model %in% mrbayes.possible.models()) stop(paste0("Don't support provided model ", arg.list$model), " yet.")
+    if (!file.exists(arg.list$alignmentPath)) stop("Provided alignment file doesn't exists!")
+    do.call(runner, arg.list)
   }
 }
 
@@ -112,23 +112,40 @@ runner <- function(model = "GTR",
                    burnin=as.integer(numofgen*.1), 
                    initialTreePath=NULL, 
                    alignmentPath=NULL, 
-                   coniferProjectDir=file.path("~", system('whoami', intern=TRUE), "conifer")) {
+                   coniferProjectDir=file.path("~", "conifer"),
+                   mrbayesOutputDir=file.path("~", "mrbayes")) {
 
 #  "/home/sohrab/conifer/src/main/resources/conifer/sampleInput/FES_4.fasta"
 #  "/home/sohrab/conifer/src/main/resources/conifer/sampleInput/FES.ape.4.nwk"  
   
+  coniferProjectDir <- path.expand(coniferProjectDir)
+  mrbayesOutputDir <- path.expand(mrbayesOutputDir)
+  dir.create(mrbayesOutputDir, showWarnings=F)
+  
+  numofgen <- as.integer(numofgen)
+  burnin <- as.integer(burnin)
+  thinning <- as.integer(thinning)
+  
+  cat("numofgen=", numofgen, " burnin=", burnin)
   
   # TODO: validate inputs
   # handle a NULL tree
   if (is.null(initialTreePath)) {
     initialTreePath <- random.tree.from.fasta(alignmentPath)
   }
-  
+  print("ho")
+  print(initialTreePath)
   
   # 2. run mrbayes and conifer with the given inputs
   #   2.1. mrbayes
   #     2.1.1. run mrbayes with the inputs
-  mrbayes.driver.function(alignmentFilePath = alignment.path, treeFilePath = initial.tree.path, "/home/sohrab/conifer_fork/mrbayes")
+  mrbayes.driver.function(alignmentFilePath=alignmentPath, 
+                          treeFilePath=initialTreePath, 
+                          batch.dir=mrbayesOutputDir, 
+                          thinning=thinning, 
+                          numofgen=numofgen, 
+                          burn.in=burnin, 
+                          model=model)
   
   # TODO: check if mrbayes.driver.function worked
   
@@ -137,7 +154,20 @@ runner <- function(model = "GTR",
     
   #   2.2 conifer
   #     2.2.1. run conifer with the inputs
-  conifer.output.dir <- conifer.driver.function(alignment.path, initial.tree.path, "/home/sohrab/conifer")
+  
+  if (!all(file.exists(coniferProjectDir, 
+                       file.path(coniferProjectDir, "settings.gradle"), 
+                       file.path(coniferProjectDir, "build.gradle")))) {
+    stop(paste0("Couldn't find conifer at the provided path ", coniferProjectDir))
+  }
+
+  conifer.output.dir <- conifer.driver.function(alignmentPath, 
+                                                initialTreePath, 
+                                                coniferProjectDir, 
+                                                thinning=thinning, 
+                                                burn.in=burnin, 
+                                                numofgen=numofgen, 
+                                                model=model)
   #     2.2.2. parse the outputs of conifer and produce ESS, ESSperSec, consensus tree with clade support, and clade support csv
   #     2.2.3. create symlinks in the output folder
   
@@ -154,24 +184,22 @@ runner <- function(model = "GTR",
   #       3.1.2. barchart of mrbayes and conifer
   make.ess.barchart(ess, numberOfRuns = 1, conifer.output.dir)
   
-  
-
-  
   #     3.2. ESSperSec
   mrbayes.ess.persecond <- mrbayes.load.esspersecond()
   conifer.ess.persecond <- conifer.load.esspersecond()
   essPerSecond <- combine.ess(mrbayes.ess.persecond, conifer.ess.persecond)
   make.ess.per.second.barchart(essPerSecond, 1, conifer.output.dir)
   
-  
-  
+
   #     3.3. consensus tree
   #       3.3.1. head to head graphs
   
   # load consensus trees
   conifer.consensus.tree <- conifer.load.consensus.tree()
   mrbayes.consensus.tree <- mrbayes.load.consensus.tree()
-  plot.side.by.side(conifer.consensus.tree, mrbayes.consensus.tree, c("Conifer", "MrBayes"), file.path(conifer.output.dir, "consensus.sidebyside.jpg"))
+  plot.side.by.side(conifer.consensus.tree, mrbayes.consensus.tree, 
+                    c("Conifer", "MrBayes"), 
+                    file.path(conifer.output.dir, "consensus.sidebyside.jpg"))
   
   
   #     3.4. clade support
