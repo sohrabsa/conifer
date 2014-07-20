@@ -1065,3 +1065,45 @@ commandString
 f <- system(commandString, intern = T)
 outputfolder <- gsub("outputFolder : ", "",  tail(f, n = 1))
                                                                                                                           
+
+
+
+plot(drop.tip(t1, setdiff(t1$tip.label, c("t3", "t4", "t5"))))
+
+
+# make some trees, for the first one, find if it's a subtree of the others:
+trees <- pbtree(n = 5, nsim = 10, scale = 1)
+# method 1:
+t1 <- trees[[1]]
+
+s <- subtrees(t1)
+class(s) <- "multiPhylo"
+
+plot(s[2])
+
+is.subtree <- function(tree, subtree) {
+  clade <- drop.tip(tree, setdiff(tree$tip.label, subtree$tip.label))
+  all.equal(subtree, clade, use.edge.length=F)
+}
+
+system.time(sum(unlist(lapply(seq_along(trees), function(i) is.subtree(trees[[i]], s[[2]])))))
+
+all.sub.trees <- get.sub.trees(trees)
+
+
+system.time({
+  l <- list()
+  for (s.i in seq_along(all.sub.trees)) {
+    l[length(l) + 1] <- (sum(unlist(lapply(seq_along(trees), function(i) is.subtree(trees[[i]], all.sub.trees[[s.i]])))))
+  }
+  print(unlist(l))
+})
+
+system.time( {
+  print(unlist(lapply( all.sub.trees, function(st) sum(unlist(lapply(all.sub.trees, function(x) all.equal(st, x, use.edge.length = F))))   )))
+
+})
+
+
+
+plot(drop.tip(t1, setdiff(t1$tip.label, c("t3", "t4", "t5"))))

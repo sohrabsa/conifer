@@ -2,11 +2,8 @@
 library(methods)
 #source("/Users/sohrab/Me/Apply/Canada Apply/Courses/Third Semester/conifer_fork/confier_fork/r.scripts/MrBayesBatch.R")
 mainDIR <- "/home/sohrab/conifer_fork/r.scripts"
-source(file.path(mainDIR, "MrBayesBatch.R"))
-source(file.path(mainDIR, "clader2.R"))
-source(file.path(mainDIR, "essGeneric.R"))
-source(file.path(mainDIR, "ConiferBenchmarking.R"))
-source(file.path(mainDIR, "MrBayesBenchmarking.R"))
+mrbayes.possible.models <- function() c("JC69", "F81", "HKY85", "K80", "GTR")
+
 
 dataDir <- "/home/sohrab/conifer/src/main/resources/conifer/sampleInput"
 
@@ -101,6 +98,15 @@ driver <- function() {
     if (length(grep("alignmentPath", switches)) == 0) stop("Empty alignmentPath. Alignment file has to be provided.")
     if (!is.null(arg.list$model) && ! arg.list$model %in% mrbayes.possible.models()) stop(paste0("Don't support provided model ", arg.list$model), " yet.")
     if (!file.exists(arg.list$alignmentPath)) stop("Provided alignment file doesn't exists!")
+    
+    
+    source(file.path(mainDIR, "MrBayesBatch.R"))
+    source(file.path(mainDIR, "clader2.R"))
+    source(file.path(mainDIR, "essGeneric.R"))
+    source(file.path(mainDIR, "ConiferBenchmarking.R"))
+    source(file.path(mainDIR, "MrBayesBenchmarking.R"))
+    
+    print(arg.list)
     do.call(runner, arg.list)
   }
 }
@@ -113,7 +119,8 @@ runner <- function(model = "GTR",
                    initialTreePath=NULL, 
                    alignmentPath=NULL, 
                    coniferProjectDir=file.path("~", "conifer"),
-                   mrbayesOutputDir=file.path("~", "mrbayes")) {
+                   mrbayesOutputDir=file.path("~", "mrbayes"), 
+                   jumpmrbayes=FALSE) {
 
 #  "/home/sohrab/conifer/src/main/resources/conifer/sampleInput/FES_4.fasta"
 #  "/home/sohrab/conifer/src/main/resources/conifer/sampleInput/FES.ape.4.nwk"  
@@ -125,6 +132,7 @@ runner <- function(model = "GTR",
   numofgen <- as.integer(numofgen)
   burnin <- as.integer(burnin)
   thinning <- as.integer(thinning)
+  jumpmrbayes <- as.logical(as.integer(jumpmrbayes))
   
   cat("numofgen=", numofgen, " burnin=", burnin)
   
@@ -133,19 +141,22 @@ runner <- function(model = "GTR",
   if (is.null(initialTreePath)) {
     initialTreePath <- random.tree.from.fasta(alignmentPath)
   }
-  print("ho")
+# Rscript driver.R -alignmentPath ~/conifer/src/main/resources/conifer/sampleInput/FES_4.fasta --numofgen 100 -jumpmarbayes 1
+  
   print(initialTreePath)
   
   # 2. run mrbayes and conifer with the given inputs
   #   2.1. mrbayes
   #     2.1.1. run mrbayes with the inputs
-  mrbayes.driver.function(alignmentFilePath=alignmentPath, 
-                          treeFilePath=initialTreePath, 
-                          batch.dir=mrbayesOutputDir, 
-                          thinning=thinning, 
-                          numofgen=numofgen, 
-                          burn.in=burnin, 
-                          model=model)
+  if (jumpmrbayes == FALSE) {  
+    mrbayes.driver.function(alignmentFilePath=alignmentPath, 
+                            treeFilePath=initialTreePath, 
+                            batch.dir=mrbayesOutputDir, 
+                            thinning=thinning, 
+                            numofgen=numofgen, 
+                            burn.in=burnin, 
+                            model=model)
+  }
   
   # TODO: check if mrbayes.driver.function worked
   
@@ -197,29 +208,30 @@ runner <- function(model = "GTR",
   # load consensus trees
   conifer.consensus.tree <- conifer.load.consensus.tree()
   mrbayes.consensus.tree <- mrbayes.load.consensus.tree()
+  
+  if (length(conifer.consensus.tree$tip.label) > 20) {
+    mrbayes.consensus.tree <- subtrees(mrbayes.consensus.tree)[[which.max(mrbayes.consensus.tree$node.label)]]
+    conifer.consensus.tree <- subtrees(conifer.consensus.tree)[[which.max(conifer.consensus.tree$node.label)]] 
+  } 
+  
   plot.side.by.side(conifer.consensus.tree, mrbayes.consensus.tree, 
                     c("Conifer", "MrBayes"), 
-                    file.path(conifer.output.dir, "consensus.sidebyside.jpg"))
-  
+                    file.path(conifer.output.dir, "consensus.sidebyside.jpg")) 
   
   #     3.4. clade support
   #       3.4.1. table with clades with high posterior
   #       3.4.2. table with common clade, probability in both mrbayes and conifer
   #       3.4.3. over the same tips, head to head clades with highest probability
   #
-  
   # CLARIFY
 }
-
-
 #
+  
 # TODO: use full data set
 #/home/sohrab/conifer_fork/src/main/resources/conifer/sampleInput/UTY_full_trimmed.nwk
-a <- "/home/sohrab/conifer/src/main/resources/conifer/sampleInput/FES_4.fasta"
-t <- "/home/sohrab/conifer/src/main/resources/conifer/sampleInput/FES.ape.4.nwk"
-  
+# a <- "/home/sohrab/conifer/src/main/resources/conifer/sampleInput/FES_4.fasta"
+# t <- "/home/sohrab/conifer/src/main/resources/conifer/sampleInput/FES.ape.4.nwk"
 #runner(a, t)
-
 #conifer.output.dir <- conifer.driver.function(a, t, "/home/sohrab/conifer")
 
 

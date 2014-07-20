@@ -52,7 +52,7 @@ conifer.run <- function(alignmentFilePath, treeFilePath, thinning, burn.in, numo
   cat("Warning! Ignoring model for the time being! NOT IMPLEMENTED IN CONIFER SIDE!\n")
   
   # only compile the changed class for now)
-  system(paste0("javac", " -classpath ", classpaths, " ", "TestPhyloModel.java"))
+  system(paste0("javac ", " -classpath ", classpaths, " ", "-source 1.7 TestPhyloModel.java"))
   system(paste0("mv ", file.path(CONIFER_PROJECT_DIR, "src/main/java/conifer/TestPhyloModel*.class"), " ",  file.path(CONIFER_PROJECT_DIR, "/build/classes/main/conifer/")))
     
   classpaths <- gsub(file.path(CONIFER_PROJECT_DIR, "/build/libs/conifer.jar:"), "", classpaths)

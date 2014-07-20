@@ -138,13 +138,22 @@ mrbayes.calculate.ESS <- function(elapsed.time) {
 # http://hydrodictyon.eeb.uconn.edu/eebedia/index.php/Phylogenetics:_MrBayes_Lab
 # map column names from mrbayes's output to those from conifer
 mrbayes.standardizeColumns.ESS <- function(ESS) {
-  
+    
   n <- names(ESS)
-  # # change from r(A<->C) to q(A(0),C(0))
+  # 1. change from r(A<->C) to q(A(0),C(0))
   indexes <- grep("r\\([ACTG]<->[ACTG]\\)", n)
-  n[indexes] <- gsub("r\\(", "q\\(", n[indexes])
-  n[indexes] <- gsub("<->", ",", n[indexes])
-  n[indexes] <- gsub("([ACTG])", "\\1(0)", n[indexes], perl=T)
+  if (length(indexes) > 0) {
+    n[indexes] <- gsub("r\\(", "q\\(", n[indexes])
+    n[indexes] <- gsub("<->", ",", n[indexes])
+    n[indexes] <- gsub("([ACTG])", "\\1(0)", n[indexes], perl=T)
+  }
+  # 2. change from pi(A) to stationary(A(0))
+  indexes <- grep("pi\\([ACTG]\\)", n)
+  if (length(indexes) > 0) {
+    n[indexes] <- gsub("pi", "stationary", n[indexes])
+    n[indexes] <- gsub("([ACTG])", "\\1(0)", n[indexes], perl=T)
+  }
+  
   names(ESS) <- n
   ESS
 }

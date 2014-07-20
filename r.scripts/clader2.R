@@ -60,6 +60,7 @@ get.count.for.tree <- function(tree, all.sub.trees) {
   
   unlist(counts)
 }
+
 set.node.labels <- function(tree, counts) {
   s <- unlist(lapply(subtrees(tree), function(t) min(t$node.label)))
   nodelabels(text=counts, node=s)
@@ -102,9 +103,12 @@ trim.fasta.file <- function(fastaPath) {
   p <- gsub(">[^|]+\\|[^|]+\\|[^|]+\\|[^|]+\\|\ (.*)\ isolate\ .*", ">\\1", p)
   
   ## remove duplicates
-  # species' names
-  t <- p[grep(">.*", p)]
   s.i <- grep(">.*", p)
+  # species' names
+  t <- p[s.i]
+  t <- gsub(" ", "_", t)
+  p[s.i] <- t
+  
   s.e <- c((s.i - 1)[-c(1)], length(s.i))
   p[s.i[1]:s.e[1]]
   p[s.i[2]:s.e[2]]
@@ -113,10 +117,15 @@ trim.fasta.file <- function(fastaPath) {
   
   p <- p[-(duplicated)]
   
-  
-  writeLines(p, paste0(file_path_sans_ext(fastaPath), "_trimmed.fasta"))
+  tail(p, 11)
+  outputFile <- paste0(file_path_sans_ext(fastaPath), "_trimmed.fasta")
+  writeLines(p, outputFile)
+  outputFile
 }
 
+fastaPath <- "/home/sohrab/conifer_fork/src/main/resources/conifer/sampleInput/FES_full_trimmed.fasta"
+fastaPath <- "/home/sohrab/conifer_fork/src/main/resources/conifer/sampleInput/FES_full.fasta"
+fastaPath <- "/home/sohrab/conifer_fork/src/main/resources/conifer/sampleInput/UTY_full_trimmed.fasta"
 
 #fastaPath <- "/home/sohrab/Downloads/FES_full.fasta"
 #fastaPath <- "/home/sohrab/Downloads/UTY_full.fasta"
