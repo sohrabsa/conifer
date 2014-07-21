@@ -112,7 +112,7 @@ conifer.calculate.ESS <- function(input.dir) {
   CONIFER_ESSPERSECOND_PATH <<- file.path(input.dir, "master.ess.per.second.txt")
   write.csv(master.ess, CONIFER_ESS_PATH)
   master.ess[, 1] <- master.ess[, 1] / experiment.length.in.seconds
-  names(master.ess) <- gsub("ESS", "ESSPS", names(master.ess))
+  #names(master.ess) <- gsub("ESS", "ESSPS", names(master.ess))
   write.csv(master.ess, CONIFER_ESSPERSECOND_PATH)
 }
 
@@ -128,17 +128,17 @@ conifer.calculate.consensus.tree <- function(input.dir) {
   consensus.tree <- consensus(all.trees, p=.5)
   
   # calculate the clade support for the consensus tree
-  all.sub.trees <- get.sub.trees(all.trees)
-  counts <- get.count.for.tree(consensus.tree, all.sub.trees)
+  #all.sub.trees <- get.sub.trees(all.trees)
+  #counts <- get.count.for.tree(consensus.tree, all.sub.trees)
   
   # write clade support to the disk
-  support.strings <- unlist(lapply(subtrees(consensus.tree), write.tree))
-  d <- data.frame(clades=support.strings, counts=counts)
-  write.csv(d, "counsensus.clade.counts.csv", row.names=F)
+  #support.strings <- unlist(lapply(subtrees(consensus.tree), write.tree))
+  #d <- data.frame(clades=support.strings, counts=counts)
+  #write.csv(d, "counsensus.clade.counts.csv", row.names=F)
   
   # write the consensus tree to the disk
   # this will write clade support as [internal] node labels 
-  consensus.tree$node.label <- counts
+  #consensus.tree$node.label <- counts
   CONIFER_CONSENSUS_TREE_PATH <<- file.path(input.dir, "consensus.tree")
   write.tree(consensus.tree, CONIFER_CONSENSUS_TREE_PATH)
 }

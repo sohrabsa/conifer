@@ -5,7 +5,9 @@ library(lattice)
 # 1. parameter, ess-value, source
 
 make.bar.chart <- function(data, numberOfRuns, plotPath, ylab) {
-  # TODO: give the 
+  # TODO: remove this  
+  #data <- data[data$source == "conifer", ]
+  
   barchart <- barchart(ESS~parameter, data, groups=source, auto.key=T, 
                            main=paste0("MCMC with n = ", numberOfRuns), xlab="Parameters", ylab=ylab, scales=list(x=list(rot=90)))
   
@@ -27,6 +29,10 @@ make.ess.per.second.barchart <- function(essPerSecond, numberOfRuns, plotPath) {
 
 
 combine.ess <- function(ess1, ess2) {
+  
+  colnames(ess1) <- c("ESS")
+  colnames(ess2) <- c("ESS")
+  
   ess1$parameter <- rownames(ess1)
   ess2$parameter <- rownames(ess2)
   

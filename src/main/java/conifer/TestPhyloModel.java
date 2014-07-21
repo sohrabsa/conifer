@@ -14,6 +14,8 @@ import blang.MCMCAlgorithm;
 import blang.MCMCFactory;
 import blang.annotations.DefineFactor;
 import blang.factors.IIDRealVectorGenerativeFactor;
+import blang.mcmc.Move;
+import blang.mcmc.RealVectorMHProposal;
 import blang.processing.Processor;
 import blang.processing.ProcessorContext;
 import briefj.BriefIO;
@@ -25,6 +27,10 @@ import conifer.ctmc.expfam.ExpFamMixture;
 import conifer.factors.NonClockTreePrior;
 import conifer.factors.UnrootedTreeLikelihood;
 import conifer.models.MultiCategorySubstitutionModel;
+import conifer.moves.AllBranchesScaling;
+import conifer.moves.PhyloHMCMove;
+import conifer.moves.SingleBranchScaling;
+import conifer.moves.SingleNNI;
 
 
 
@@ -72,7 +78,7 @@ public class TestPhyloModel implements Runnable, Processor
 		Exponential<Exponential.MeanParameterization> branchLengthHyperPrior = 
 		Exponential
 		.on(treePrior.branchDistributionParameters.rate)
-		.withMean(10.0);
+		.withMean(0.1);
 
 		@DefineFactor
 		public final IIDRealVectorGenerativeFactor<MeanVarianceParameterization> prior =
@@ -91,6 +97,7 @@ public class TestPhyloModel implements Runnable, Processor
 
 	private final PrintWriter detailWriter = BriefIO.output(Results.getFileInResultFolder("experiment.details.txt"));
 
+	@SuppressWarnings("unchecked")
 	@Override
 	 public void run()
 	 {
@@ -103,12 +110,22 @@ public class TestPhyloModel implements Runnable, Processor
 		factory.mcmcOptions.burnIn = burnIn;
 		factory.mcmcOptions.thinningPeriod = thinningPeriod;
 		
+		// reference bug http://stackoverflow.com/questions/4829576/javac-error-inconvertible-types-with-generics
+		
+		//factory.excludeNodeMove((Class<? extends Move>) (Object)SingleBranchScaling.class);
+		//factory.excludeNodeMove(AllBranchesScaling.class);
+		//factory.excludeNodeMove(PhyloHMCMove.class);
+		//factory.excludeNodeMove((Class<? extends Move>) (Object)SingleNNI.class);
+		//factory.excludeNodeMove((Class<? extends Move>) (Object)RealVectorMHProposal.class);
+		
 	    model = new Model();
 	    MCMCAlgorithm mcmc = factory.build(model, false);
 	    System.out.println(mcmc.model);
 	    
 	    long startTime = System.currentTimeMillis();
-		String excluding = "GTR-AllMoves";
+		String excluding = "GTR-Excluding all but SPR move";
+		
+	
 
 		// log experiment information
 		logToFile("Experiment Title:" + excluding);
@@ -127,19 +144,19 @@ public class TestPhyloModel implements Runnable, Processor
 	    logToFile("Total time in minutes: " + ((System.currentTimeMillis() - startTime)/60000.0));
 
 		// compute the tree
-		MajorityRuleTree.buildAndWriteConsensusTree(
-				Results.getFileInResultFolder("FES.trees.newick"),
-				Results.getFileInResultFolder("FESConsensusTree.Nexus"));
-
-		// copy the results to another folder 
-		File newDirectory = new File(Results.getResultFolder().getParent() + "/experiment." + Results.getResultFolder().getName() + "." + 1 + "." + System.currentTimeMillis());
-		newDirectory.mkdir();
-		try {
-			FileUtils.copyDirectory(Results.getResultFolder(), newDirectory);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//		MajorityRuleTree.buildAndWriteConsensusTree(
+//				Results.getFileInResultFolder("FES.trees.newick"),
+//				Results.getFileInResultFolder("FESConsensusTree.Nexus"));
+//
+//		// copy the results to another folder 
+//		File newDirectory = new File(Results.getResultFolder().getParent() + "/experiment." + Results.getResultFolder().getName() + "." + 1 + "." + System.currentTimeMillis());
+//		newDirectory.mkdir();
+//		try {
+//			FileUtils.copyDirectory(Results.getResultFolder(), newDirectory);
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 	 }
 	
 	
@@ -153,7 +170,7 @@ public class TestPhyloModel implements Runnable, Processor
 //		args[1] = "/home/sohrab/conifer/src/main/resources/conifer/sampleInput/FES.ape.4.nwk";
 //		args[2] = "-alignmentFile";
 //		args[3] = "/home/sohrab/conifer/src/main/resources/conifer/sampleInput/FES_4.fasta";
-//		
+		
 		//args = new String[1];
 		//args[0] = "-help";
 		

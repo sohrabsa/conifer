@@ -4,6 +4,9 @@ library(methods)
 mainDIR <- "/home/sohrab/conifer_fork/r.scripts"
 mrbayes.possible.models <- function() c("JC69", "F81", "HKY85", "K80", "GTR")
 
+# sample run
+# Rscript driver.R -alignmentPath ~/conifer/src/main/resources/conifer/sampleInput/FES_4.fasta -initialTreePath ~/conifer/src/main/resources/conifer/sampleInput/FES.ape.4.nwk
+
 
 dataDir <- "/home/sohrab/conifer/src/main/resources/conifer/sampleInput"
 
@@ -99,7 +102,6 @@ driver <- function() {
     if (!is.null(arg.list$model) && ! arg.list$model %in% mrbayes.possible.models()) stop(paste0("Don't support provided model ", arg.list$model), " yet.")
     if (!file.exists(arg.list$alignmentPath)) stop("Provided alignment file doesn't exists!")
     
-    
     source(file.path(mainDIR, "MrBayesBatch.R"))
     source(file.path(mainDIR, "clader2.R"))
     source(file.path(mainDIR, "essGeneric.R"))
@@ -120,6 +122,8 @@ runner <- function(model = "GTR",
                    alignmentPath=NULL, 
                    coniferProjectDir=file.path("~", "conifer"),
                    mrbayesOutputDir=file.path("~", "mrbayes"), 
+                   fixed.topology=FALSE,
+                   fixed.branch.length=FALSE,
                    jumpmrbayes=FALSE) {
 
 #  "/home/sohrab/conifer/src/main/resources/conifer/sampleInput/FES_4.fasta"
@@ -133,6 +137,9 @@ runner <- function(model = "GTR",
   burnin <- as.integer(burnin)
   thinning <- as.integer(thinning)
   jumpmrbayes <- as.logical(as.integer(jumpmrbayes))
+  fixed.topology <- as.logical(as.integer(fixed.topology))
+  fixed.branch.length <- as.logical(as.integer(fixed.branch.length))
+  
   
   cat("numofgen=", numofgen, " burnin=", burnin)
   
@@ -155,7 +162,9 @@ runner <- function(model = "GTR",
                             thinning=thinning, 
                             numofgen=numofgen, 
                             burn.in=burnin, 
-                            model=model)
+                            model=model,
+                            fixed.topology=fixed.topology,
+                            fixed.branch.length=fixed.branch.length)
   }
   
   # TODO: check if mrbayes.driver.function worked
@@ -172,6 +181,7 @@ runner <- function(model = "GTR",
     stop(paste0("Couldn't find conifer at the provided path ", coniferProjectDir))
   }
 
+  # TODO: fixed branch length
   conifer.output.dir <- conifer.driver.function(alignmentPath, 
                                                 initialTreePath, 
                                                 coniferProjectDir, 
@@ -193,13 +203,13 @@ runner <- function(model = "GTR",
   conifer.ess <- conifer.load.ess()
   ess <- combine.ess(mrbayes.ess, conifer.ess)
   #       3.1.2. barchart of mrbayes and conifer
-  make.ess.barchart(ess, numberOfRuns = 1, conifer.output.dir)
+  make.ess.barchart(ess, numberOfRuns = numofgen, conifer.output.dir)
   
   #     3.2. ESSperSec
   mrbayes.ess.persecond <- mrbayes.load.esspersecond()
   conifer.ess.persecond <- conifer.load.esspersecond()
   essPerSecond <- combine.ess(mrbayes.ess.persecond, conifer.ess.persecond)
-  make.ess.per.second.barchart(essPerSecond, 1, conifer.output.dir)
+  make.ess.per.second.barchart(essPerSecond, numofgen, conifer.output.dir)
   
 
   #     3.3. consensus tree
@@ -209,15 +219,23 @@ runner <- function(model = "GTR",
   conifer.consensus.tree <- conifer.load.consensus.tree()
   mrbayes.consensus.tree <- mrbayes.load.consensus.tree()
   
-  if (length(conifer.consensus.tree$tip.label) > 20) {
-    mrbayes.consensus.tree <- subtrees(mrbayes.consensus.tree)[[which.max(mrbayes.consensus.tree$node.label)]]
-    conifer.consensus.tree <- subtrees(conifer.consensus.tree)[[which.max(conifer.consensus.tree$node.label)]] 
-  } 
-  
-  plot.side.by.side(conifer.consensus.tree, mrbayes.consensus.tree, 
-                    c("Conifer", "MrBayes"), 
-                    file.path(conifer.output.dir, "consensus.sidebyside.jpg")) 
-  
+  # are the consensus trees the same?
+  message <- ifelse(all.equal(conifer.consensus.tree, mrbayes.consensus.tree, use.edge.length=F), 
+         "Consensus trees are the same.", "Consensus trees do not match!") 
+    print(message)
+    writeLines(message, file.path(conifer.output.dir, "correctness.tests.txt"))
+
+    
+#   if (length(conifer.consensus.tree$tip.label) > 20) {
+#     mrbayes.consensus.tree <- subtrees(mrbayes.consensus.tree)[[which.max(mrbayes.consensus.tree$node.label)]]
+#     conifer.consensus.tree <- subtrees(conifer.consensus.tree)[[which.max(conifer.consensus.tree$node.label)]] 
+#   } 
+#   
+# 
+#   plot.side.by.side(conifer.consensus.tree, mrbayes.consensus.tree, 
+#                     c("Conifer", "MrBayes"), 
+#                     file.path(conifer.output.dir, "consensus.sidebyside.jpg")) 
+#   
   #     3.4. clade support
   #       3.4.1. table with clades with high posterior
   #       3.4.2. table with common clade, probability in both mrbayes and conifer

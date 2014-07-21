@@ -60,7 +60,40 @@ makeDataFileForMrBayes <- function(alignmentFile, treeFile) {
 # TL is sum of all branch lengths
 # LnL is the log likelihood of the cold chain
 
+# 1. fixed topo and fixed branch length
+# 2. fixed topo and latent branch length
+
+
+# exponential in mrbayes is parametrized by rate, so exponential(10) has an expected value of .1 
+# ref: http://mrbayes.sourceforge.net/wiki/index.php/Evolutionary_Models_Implemented_in_MrBayes_3
+
+# TODO: FIX rate to mean in mrbayes
+
 mrbayes.possible.models <- function() c("JC69", "F81", "HKY85", "K80", "GTR")
+# ref: http://mrbayes.sourceforge.net/wiki/index.php/FAQ-3.2#How_do_I_fix_the_tree_topology_during_an_analysis.3F
+# fixed topoly:
+# MrBayes> showmoves
+# ...
+# 5 -- Move     = eTBR(Tau)
+# Type        = Extending TBR
+# Parameters  = Tau [param. 5] (Topology)
+# V [param. 6] (Branch lengths)
+# Tuningparam = p_ext (Extension probability)
+# lambda (Multiplier tuning parameter)
+# p_ext = 0.800
+# lambda = 0.940
+# Rel. prob.  = 15.0
+# MrBayes> propset eTBR(Tau)$prob=0
+# MrBayes> showmoves allavailable=yes
+# ...
+# 7 -- Move        = Nslider(V)
+# Type        = Node slider (uniform on possible positions)
+# Parameter   = V [param. 6] (Branch lengths)
+# Tuningparam = lambda (Multiplier tuning parameter)
+# lambda = 0.191
+# Rel. prob.  = 0.0
+# MrBayes> propset nslider(V)$prob=5
+
 
 # @model: could be in c("JC69", "F81", "HKY85", "K80", "GTR)
 compileBatchScriptForMrBayes <- function(data.file, 
@@ -68,13 +101,12 @@ compileBatchScriptForMrBayes <- function(data.file,
                                          model="JC69", 
                                          thinning = 10, 
                                          burn.in = 1000, 
-                                         ngenerations = 10000) {
+                                         ngenerations = 10000, 
+                                         fixed.topology = FALSE, 
+                                         fixed.branch.length = FALSE) {
   mrbayes <- new("mrbayesbatch")
   setTags(mrbayes) <- list(command="set", list=list(autoclose="yes", nowarn="yes"))
   addMultiPartCommand(mrbayes) <- (list("execute", data.file))
-  
-  # set the start values to be read from the provided initial tree
-  setTags(mrbayes) <- list(command="startvals", list=list(tau="mm", V="mm"))
   
   # setup the model
   switch(model, 
@@ -95,13 +127,30 @@ compileBatchScriptForMrBayes <- function(data.file,
            setTags(mrbayes) <- list(command="lset", list=list(nst=2, rates="Equal"))
            setTags(mrbayes) <- list(command="prset", list=list(statefreqpr="fixed(equal)"))
          },
-         GTR={
+         GTR={            
            setTags(mrbayes) <- list(command="lset", list=list(nst=6, rates="Equal"))
          },
          {
            cat("Model ", model, " isn't supported yet.")
          }
   )
+  
+  # set the start values to be read from the provided initial tree
+  setTags(mrbayes) <- list(command="startvals", list=list(tau="mm", V="mm"))
+  
+  # fixe topology?
+  if (fixed.topology == T) {
+    # topology
+    setTags(mrbayes) <- list(command="propset", list=list("ParsSPR(Tau,V)$prob"=0))
+    setTags(mrbayes) <- list(command="propset", list=list("NNI(Tau,V)$prob"=0))
+  }
+  
+  if (fixed.branch.length == T) {
+    # branch_length
+    setTags(mrbayes) <- list(command="propset", list=list("Nodeslider(V)$prob"=0))
+    setTags(mrbayes) <- list(command="propset", list=list("Multiplier(V)$prob"=0))
+    setTags(mrbayes) <- list(command="propset", list=list("TLMultiplier(V)$prob"=0))
+  }
   
   setTags(mrbayes) <- list(command="mcmc", list=list(ngen=ngenerations, samplefreq=thinning))
   setTags(mrbayes) <- list(command="sump", list=list(burnin=burn.in))
@@ -189,7 +238,15 @@ mrbayes.calculate.consensus.tree <- function(burn.in, thinning) {
 }
 
 
-mrbayes.driver.function <- function(treeFilePath, alignmentFilePath, batch.dir, model, thinning, burn.in, numofgen) {
+mrbayes.driver.function <- function(treeFilePath, 
+                                    alignmentFilePath, 
+                                    batch.dir, 
+                                    model, 
+                                    thinning, 
+                                    burn.in, 
+                                    numofgen, 
+                                    fixed.topology,
+                                    fixed.branch.length) {
   print(deparse(match.call()))
   currentWD <- getwd()
   
@@ -210,7 +267,9 @@ mrbayes.driver.function <- function(treeFilePath, alignmentFilePath, batch.dir, 
                                model=model, 
                                thinning=thinning, 
                                burn.in=burn.in, 
-                               ngenerations=numofgen)
+                               ngenerations=numofgen,
+                               fixed.topology=fixed.topology,
+                               fixed.branch.length=fixed.branch.length)
   
   # get the elapsed time
   the.run.time <- system.time(mrbayes.analysis(batch.file.name))
@@ -220,7 +279,7 @@ mrbayes.driver.function <- function(treeFilePath, alignmentFilePath, batch.dir, 
   mrbayes.calculate.ESS(elapsed.time)
   
   # calculate the concensus tree
-  mrbayes.calculate.consensus.tree(100, 10)
+  mrbayes.calculate.consensus.tree(burn.in, thinning)
   
   # keep record of the analysis time
   writeLines(c(paste("Analysis for ", batch.file.name, ", took", elapsed.time, "seconds.")), "experiment.details.txt")
@@ -235,3 +294,32 @@ mrbayes.driver.function <- function(treeFilePath, alignmentFilePath, batch.dir, 
 #mrbayes.driver.function("FES.ape.4.nwk", "FES_4.fasta")
 
 #consensus <- read.nexus("/Users/sohrab/Me/Apply/Canada\ Apply/Courses/Third\ Semester/conifer/extras/mrbayes/FES_8_batch.GTR.two/FES_8_batch.GTR.two.nex.tree1.con.tre")
+
+
+
+# sample GTR batch for mrbayes (with data.file including a tree called mm)
+# fixed topology
+# Execute data.nex
+# lset nst=6 rates=Equal
+# startvals tau=mm V=mm;
+# 
+# showmoves
+# 
+# # branch_length
+# propset Nodeslider(V)$prob=0
+# 
+# # topology
+# propset ParsSPR(Tau,V)$prob=0
+# 
+# # topology
+# propset NNI(Tau,V)$prob=0
+# 
+# # branch_length
+# propset Multiplier(V)$prob=0
+# 
+# # branch_length
+# propset TLMultiplier(V)$prob=0
+# 
+# mcmc ngen=1000 samplefreq=10
+# sump burnin=100
+# sumt burnin=100

@@ -1082,7 +1082,7 @@ class(s) <- "multiPhylo"
 plot(s[2])
 
 is.subtree <- function(tree, subtree) {
-  clade <- drop.tip(tree, setdiff(tree$tip.label, subtree$tip.label))
+  clade <- drop.tip(tree, setdiff(tree$tip.label, subtree$tip.label), is.subtree=T)
   all.equal(subtree, clade, use.edge.length=F)
 }
 
@@ -1104,6 +1104,15 @@ system.time( {
 
 })
 
+get.count.for.tree(all.sub.trees[[2]], all.sub.trees)
+
 
 
 plot(drop.tip(t1, setdiff(t1$tip.label, c("t3", "t4", "t5"))))
+
+# find the node in tree1 that covers all the tips in tree 2
+t1 <- trees[[1]]
+t2 <- trees[[2]]
+
+tips <- match(t1$tip.label, t2$tip.label)
+
