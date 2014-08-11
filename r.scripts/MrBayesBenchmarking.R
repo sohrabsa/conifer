@@ -320,6 +320,6 @@ mrbayes.driver.function <- function(treeFilePath,
 # # branch_length
 # propset TLMultiplier(V)$prob=0
 # 
-# mcmc ngen=1000 samplefreq=10
-# sump burnin=100
-# sumt burnin=100
+# mcmc ngen=10000 samplefreq=10
+# sump burnin=1000
+# sumt burnin=1000

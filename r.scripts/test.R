@@ -1116,3 +1116,19 @@ t2 <- trees[[2]]
 
 tips <- match(t1$tip.label, t2$tip.label)
 
+
+# simple bayesian inference to test blang
+
+unnormalizedPosterior <- function(rateValue, data) {
+  return (dunif(rateValue, max=max(data)) * sum(unlist(lapply(data, function(x) log(dexp(x, rate=rateValue))))))
+}
+
+(unnormalizedPosterior(.9, d))
+
+
+l <- rexp(100, rate = 1)
+writeLines(text=paste(as.list(l), collapse = "\n" ),
+           "/Users/sohrab/project/bayonet/data/exp.sample.csv")
+
+
+# fit an exponential to these data
