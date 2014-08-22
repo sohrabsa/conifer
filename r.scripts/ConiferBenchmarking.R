@@ -43,7 +43,7 @@ conifer.class.path.string <- function() {
 }
 
 # compile and run conifer
-conifer.run <- function(alignmentFilePath, treeFilePath, thinning, burn.in, numofgen, model) {
+conifer.run <- function(alignmentFilePath, treeFilePath, thinning, burn.in, numofgen, model, fixed.topology, fixed.branch.length) {
   classpaths <- conifer.class.path.string()
   
   t <- getwd()
@@ -61,7 +61,9 @@ conifer.run <- function(alignmentFilePath, treeFilePath, thinning, burn.in, numo
                           "' --alignmentFilePath '", alignmentFilePath, "'", 
                           " --nMCMCSweeps ", numofgen,
                           " --burnIn ", burn.in, 
-                          " --thinningPeriod ", thinning)
+                          " --thinningPeriod ", thinning, 
+                          " --fixedTopology", fixed.topology,
+                          " --fixedBranchLength", fixed.branch.length)
   commandString
   setwd(CONIFER_PROJECT_DIR)
   f <- system(commandString, intern = T)
@@ -74,11 +76,15 @@ conifer.run <- function(alignmentFilePath, treeFilePath, thinning, burn.in, numo
 
 conifer.calculate.ESS <- function(input.dir) {
   # calculate ess perseconds
+  input.dir <- "/Users/sohrab/project/conifer/results/all/2014-08-19-09-54-13-j0Yos85y.exec"
   experiment.files <- c(input.dir)
   master.ess <- data.frame()
+  //experiment <- experiment.files[[1]]
   for (experiment in experiment.files) {
     sub.folders <- list.files(experiment)
     sub.folders <- sub.folders[grepl("-csv", sub.folders)]
+    
+    //parameter.folder <- sub.folders[[1]]
     
     for (parameter.folder in sub.folders) {
       # for any csv file
@@ -86,8 +92,11 @@ conifer.calculate.ESS <- function(input.dir) {
       csv.files <-csv.files[grepl(".csv", csv.files)]
       rowNamesList <- list()
       l <- data.frame()
+      
+      //csv.file <- csv.files[[1]]
+      
       for (csv.file in csv.files) {
-        if (csv.file == "ess.csv") next
+        if (csv.file == "ess.csv" || grep("BivariateIdentity", csv.file) == 1) next
         
         the.file <- file.path(experiment, parameter.folder, csv.file)
         p <- read.table(the.file, row.names = 1, header=T, sep=",")
@@ -145,12 +154,20 @@ conifer.calculate.consensus.tree <- function(input.dir) {
 
 # sivhf300lfmvnGOGO
 
-conifer.driver.function <- function(treeFilePath, alignmentFilePath, conifer.project.dir, thinning, burn.in, numofgen, model) {
+conifer.driver.function <- function(treeFilePath, 
+                                    alignmentFilePath, 
+                                    conifer.project.dir, 
+                                    thinning, 
+                                    burn.in, 
+                                    numofgen, 
+                                    model,
+                                    fixed.topology,
+                                    fixed.branch.length) {
   # calculate ESS and ESS per second
   CONIFER_PROJECT_DIR <<- conifer.project.dir
   
   # run conifer and return output directory
-  output.folder <- conifer.run(treeFilePath, alignmentFilePath, thinning = thinning, burn.in=burn.in, numofgen=numofgen, model=model)
+  output.folder <- conifer.run(treeFilePath, alignmentFilePath, thinning = thinning, burn.in=burn.in, numofgen=numofgen, model=model, fixed.topology=fixed.topology, fixed.branch.length=fixed.branch.length)
 
   # calculate ESS and ESS per second
   conifer.calculate.ESS(output.folder)

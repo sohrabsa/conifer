@@ -130,32 +130,32 @@ compileBatchScriptForMrBayes <- function(data.file,
          GTR={            
            setTags(mrbayes) <- list(command="lset", list=list(nst=6, rates="Equal"))
          },
-         {
-           cat("Model ", model, " isn't supported yet.")
-         }
+{
+  cat("Model ", model, " isn't supported yet.")
+}
   )
-  
-  # set the start values to be read from the provided initial tree
-  setTags(mrbayes) <- list(command="startvals", list=list(tau="mm", V="mm"))
-  
-  # fixe topology?
-  if (fixed.topology == T) {
-    # topology
-    setTags(mrbayes) <- list(command="propset", list=list("ParsSPR(Tau,V)$prob"=0))
-    setTags(mrbayes) <- list(command="propset", list=list("NNI(Tau,V)$prob"=0))
-  }
-  
-  if (fixed.branch.length == T) {
-    # branch_length
-    setTags(mrbayes) <- list(command="propset", list=list("Nodeslider(V)$prob"=0))
-    setTags(mrbayes) <- list(command="propset", list=list("Multiplier(V)$prob"=0))
-    setTags(mrbayes) <- list(command="propset", list=list("TLMultiplier(V)$prob"=0))
-  }
-  
-  setTags(mrbayes) <- list(command="mcmc", list=list(ngen=ngenerations, samplefreq=thinning))
-  setTags(mrbayes) <- list(command="sump", list=list(burnin=burn.in))
-  setTags(mrbayes) <- list(command="sumt", list=list(burnin=burn.in))
-  writeToDisk(mrbayes, bath.script.file.name)  
+
+# set the start values to be read from the provided initial tree
+setTags(mrbayes) <- list(command="startvals", list=list(tau="mm", V="mm"))
+
+# fixe topology?
+if (fixed.topology == T) {
+  # topology
+  setTags(mrbayes) <- list(command="propset", list=list("ParsSPR(Tau,V)$prob"=0))
+  setTags(mrbayes) <- list(command="propset", list=list("NNI(Tau,V)$prob"=0))
+}
+
+if (fixed.branch.length == T) {
+  # branch_length
+  setTags(mrbayes) <- list(command="propset", list=list("Nodeslider(V)$prob"=0))
+  setTags(mrbayes) <- list(command="propset", list=list("Multiplier(V)$prob"=0))
+  setTags(mrbayes) <- list(command="propset", list=list("TLMultiplier(V)$prob"=0))
+}
+
+setTags(mrbayes) <- list(command="mcmc", list=list(ngen=ngenerations, samplefreq=thinning))
+setTags(mrbayes) <- list(command="sump", list=list(burnin=burn.in))
+setTags(mrbayes) <- list(command="sumt", list=list(burnin=burn.in))
+writeToDisk(mrbayes, bath.script.file.name)  
 }
 
 mrbayes.analysis <- function(batch.script) {
@@ -187,7 +187,7 @@ mrbayes.calculate.ESS <- function(elapsed.time) {
 # http://hydrodictyon.eeb.uconn.edu/eebedia/index.php/Phylogenetics:_MrBayes_Lab
 # map column names from mrbayes's output to those from conifer
 mrbayes.standardizeColumns.ESS <- function(ESS) {
-    
+  
   n <- names(ESS)
   # 1. change from r(A<->C) to q(A(0),C(0))
   indexes <- grep("r\\([ACTG]<->[ACTG]\\)", n)
@@ -220,7 +220,7 @@ mrbayes.calculate.consensus.tree <- function(burn.in, thinning) {
   
   # calculate the consensus tree
   consensus.tree <- consensus(all.trees, p=.5)
-
+  
   # calculate the clade support for the consensus tree
   all.sub.trees <- get.sub.trees(all.trees)
   counts <- get.count.for.tree(consensus.tree, all.sub.trees)
@@ -253,7 +253,7 @@ mrbayes.driver.function <- function(treeFilePath,
   # set dir where the mrbayes files should be placed
   MRBAYES_EXPERIMENT_PATH <<- file.path(batch.dir, format(Sys.time(), "mrbayes-%y-%m-%d-%H-%M-%S")) 
   dir.create(MRBAYES_EXPERIMENT_PATH)
-
+  
   setwd(MRBAYES_EXPERIMENT_PATH)
   batch.file.name <- "mbbatch.txt"
   
@@ -289,6 +289,13 @@ mrbayes.driver.function <- function(treeFilePath,
   
   MRBAYES_EXPERIMENT_PATH
 }
+
+
+# /Users/sohrab/project/conifer_fork/src/main/resources/conifer/sampleInput/FES_4.fasta
+# /Users/sohrab/project/conifer_fork/src/main/resources/conifer/sampleInput/FES.ape.4.nwk
+# /Users/sohrab/project/conifer_fork/mrbayes
+
+# mrbayes.driver.function(treeFilePath = "/Users/sohrab/project/conifer_fork/src/main/resources/conifer/sampleInput/FES.ape.4.nwk", alignmentFilePath = "/Users/sohrab/project/conifer_fork/src/main/resources/conifer/sampleInput/FES_4.fasta", model = "K80", batch.dir = "/Users/sohrab/project/conifer_fork/mrbayes", fixed.topology = F, fixed.branch.length = F, numofgen = 10000, burn.in = 1000, thinning = 10)
 
 
 #mrbayes.driver.function("FES.ape.4.nwk", "FES_4.fasta")

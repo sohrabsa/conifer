@@ -30,10 +30,18 @@ calculateESS <- function(input.dir) {
       rowNamesList <- list()
       l <- data.frame()
       for (csv.file in csv.files) {
-        if (csv.file == "ess.csv") next
+        print(csv.file)
+        if (csv.file == "ess.csv" || length(grep("BivariateIdentity", csv.file))) next
         
         the.file <- file.path(experiment, parameter.folder, csv.file)
-        p <- read.table(the.file, row.names = 1, header=T, sep=",")
+      
+        print(the.file)
+        
+        p <- read.csv(the.file, row.names = 1, header=T, stringsAsFactors=F)
+        
+        if (ncol(p) > 1) next;
+        
+        p <- p[, 1] <- as.numeric(p[, 1])
         l <- rbind(l, effectiveSize(p))
         rowNamesList[length(rowNamesList) + 1] <- csv.file
       }

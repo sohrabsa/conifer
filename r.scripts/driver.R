@@ -1,7 +1,7 @@
 # Benchmark scaffold
 library(methods)
 #source("/Users/sohrab/Me/Apply/Canada Apply/Courses/Third Semester/conifer_fork/confier_fork/r.scripts/MrBayesBatch.R")
-mainDIR <- "/home/sohrab/conifer_fork/r.scripts"
+mainDIR <- "/Users/sohrab/project/conifer_fork/r.scripts/"
 mrbayes.possible.models <- function() c("JC69", "F81", "HKY85", "K80", "GTR")
 
 # sample run

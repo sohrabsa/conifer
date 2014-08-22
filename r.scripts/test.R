@@ -1126,9 +1126,39 @@ unnormalizedPosterior <- function(rateValue, data) {
 (unnormalizedPosterior(.9, d))
 
 
-l <- rexp(100, rate = 1)
+l <- rexp(100, rate = .1)
 writeLines(text=paste(as.list(l), collapse = "\n" ),
            "/Users/sohrab/project/bayonet/data/exp.sample.csv")
 
 
 # fit an exponential to these data
+hist(l)
+
+minussumlog <- function(mean, theData) {
+  -sum(log(dexp(tehData, rate = 1/mean)))
+}
+
+# beta dist explorer
+f <- function(x, y = NULL) {
+  if (is.null(y)) y = x;
+  
+  plot(seq(0, 1, .001), dbeta(seq(0, 1, .001), shape1 = x, shape2 = y), cex=.1)
+}
+
+
+
+
+# read newick
+trees.path <- "/Users/sohrab/project/conifer/results/all/2014-08-17-09-54-17-Vk78Vv2C.exec/FES.trees.newick"
+trees <- read.tree(trees.path)
+
+# fixed topology and branch length
+allEqual <- function(trees, check.branch.length = TRUE) {
+  for (i in 1:(length(trees) - 1)) {
+    if (!all.equal(trees[i], trees[i+1], use.edge.length = check.branch.length)) 
+      return(FALSE)
+  }
+  
+  return(TRUE)
+}
+

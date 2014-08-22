@@ -123,6 +123,24 @@ trim.fasta.file <- function(fastaPath) {
   outputFile
 }
 
+
+# given the path to a newick file, determines if all the trees have the same topology and branch.length
+allEqual.from.file <- function(newick.file.path, check.branch.length = TRUE) {
+  trees <- read.tree(newick.file.path)
+  allEqual(trees, check.branch.length)
+}
+
+# fixed topology and branch length
+allEqual <- function(trees, check.branch.length = TRUE) {
+  for (i in 1:(length(trees) - 1)) {
+    if (!all.equal(trees[[i]], trees[[i+1]], use.edge.length = check.branch.length)) 
+      return(FALSE)
+  }
+  
+  return(TRUE)
+}
+
+
 fastaPath <- "/home/sohrab/conifer_fork/src/main/resources/conifer/sampleInput/FES_full_trimmed.fasta"
 fastaPath <- "/home/sohrab/conifer_fork/src/main/resources/conifer/sampleInput/FES_full.fasta"
 fastaPath <- "/home/sohrab/conifer_fork/src/main/resources/conifer/sampleInput/UTY_full_trimmed.fasta"
