@@ -52,18 +52,21 @@ conifer.run <- function(alignmentFilePath, treeFilePath, thinning, burn.in, numo
   cat("Warning! Ignoring model for the time being! NOT IMPLEMENTED IN CONIFER SIDE!\n")
   
   # only compile the changed class for now)
-  system(paste0("javac ", " -classpath ", classpaths, " ", "-source 1.7 TestPhyloModel.java"))
+  # system(paste0("javac ", " -classpath ", classpaths, " ", "-source 1.6 TestPhyloModel.java"))
+  system(paste0("javac ", " -classpath ", classpaths, " ", "TestPhyloModel.java"))
   system(paste0("mv ", file.path(CONIFER_PROJECT_DIR, "src/main/java/conifer/TestPhyloModel*.class"), " ",  file.path(CONIFER_PROJECT_DIR, "/build/classes/main/conifer/")))
     
   classpaths <- gsub(file.path(CONIFER_PROJECT_DIR, "/build/libs/conifer.jar:"), "", classpaths)
   commandString <- paste0("java", " -classpath ", classpaths, " conifer.TestPhyloModel",
                           " --initialTreeFilePath '", treeFilePath,
                           "' --alignmentFilePath '", alignmentFilePath, "'", 
-                          " --nMCMCSweeps ", numofgen,
-                          " --burnIn ", burn.in, 
-                          " --thinningPeriod ", thinning, 
+                          " --factory.mcmc.nMCMCSweeps ", numofgen,
+                          " --factory.mcmc.burnIn ", burn.in, 
+                          " --factory.mcmc.thinningPeriod ", thinning, 
                           " --fixedTopology", fixed.topology,
-                          " --fixedBranchLength", fixed.branch.length)
+                          " --fixedBranchLength", fixed.branch.length,
+                          " --factory.mcmc.CODA", "false"
+                          )
   commandString
   setwd(CONIFER_PROJECT_DIR)
   f <- system(commandString, intern = T)
@@ -76,15 +79,15 @@ conifer.run <- function(alignmentFilePath, treeFilePath, thinning, burn.in, numo
 
 conifer.calculate.ESS <- function(input.dir) {
   # calculate ess perseconds
-  input.dir <- "/Users/sohrab/project/conifer/results/all/2014-08-19-09-54-13-j0Yos85y.exec"
+  # input.dir <- "/Users/sohrab/project/conifer/results/all/2014-08-19-09-54-13-j0Yos85y.exec"
   experiment.files <- c(input.dir)
   master.ess <- data.frame()
-  //experiment <- experiment.files[[1]]
+  #experiment <- experiment.files[[1]]
   for (experiment in experiment.files) {
     sub.folders <- list.files(experiment)
     sub.folders <- sub.folders[grepl("-csv", sub.folders)]
     
-    //parameter.folder <- sub.folders[[1]]
+    #parameter.folder <- sub.folders[[1]]
     
     for (parameter.folder in sub.folders) {
       # for any csv file
@@ -93,13 +96,16 @@ conifer.calculate.ESS <- function(input.dir) {
       rowNamesList <- list()
       l <- data.frame()
       
-      //csv.file <- csv.files[[1]]
+      #csv.file <- csv.files[[1]]
       
       for (csv.file in csv.files) {
-        if (csv.file == "ess.csv" || grep("BivariateIdentity", csv.file) == 1) next
+        if (csv.file == "ess.csv" || length(grep("BivariateIdentity", csv.file))) next
         
         the.file <- file.path(experiment, parameter.folder, csv.file)
+        print(the.file)
         p <- read.table(the.file, row.names = 1, header=T, sep=",")
+        if (ncol(p) > 1) next;
+        p <- p[, 1] <- as.numeric(p[, 1])
         l <- rbind(l, effectiveSize(p))
         rowNamesList[length(rowNamesList) + 1] <- csv.file      
       }

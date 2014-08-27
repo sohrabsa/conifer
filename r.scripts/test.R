@@ -1149,16 +1149,159 @@ f <- function(x, y = NULL) {
 
 
 # read newick
-trees.path <- "/Users/sohrab/project/conifer/results/all/2014-08-17-09-54-17-Vk78Vv2C.exec/FES.trees.newick"
+//trees.path <- "/Users/sohrab/project/conifer/results/all/2014-08-17-09-54-17-Vk78Vv2C.exec/FES.trees.newick"
+trees.path <- "/Users/sohrab/project/conifer/results/all/2014-08-17-12-27-19-DgazlNCj.exec/FES.trees.newick"
 trees <- read.tree(trees.path)
 
 # fixed topology and branch length
 allEqual <- function(trees, check.branch.length = TRUE) {
   for (i in 1:(length(trees) - 1)) {
-    if (!all.equal(trees[i], trees[i+1], use.edge.length = check.branch.length)) 
+    if (!all.equal(trees[[i]], trees[[i+1]], use.edge.length = check.branch.length)) 
       return(FALSE)
   }
   
   return(TRUE)
 }
+
+
+# the paper graph updates (\theta, \alpha, \beta) scheme
+library(gRbase)
+install.packages("gRbase", dependencies = T)
+library(RBGL)
+library(graph)
+library(Rgraphviz)
+dependencies ‘RBGL’, ‘graph’, ‘Rgraphviz’ are not available
+install.packages("grpah")
+install.packages("Rgraphviz")
+source("http://bioconductor.org/biocLite.R")
+biocLite()
+source("http://bioconductor.org/biocLite.R")
+biocLite("RBGL")
+
+library(rMathpiper)
+
+Simplify("")
+
+g <- ug( ~a:b:c + c:d + d:e + a:e + f:g )
+g <- addNode("s", g)
+plot(g)
+g <- addEdge("s", "a", g, weights = 5)
+g <- addEdge("s", "s", g, weights = 10)
+
+
+plot(g)
+edgeWeights(g)
+
+
+
+plot.g <- function(graph) {
+  dev.off(dev.list()["RStudioGD"])
+  #ew <- as.character(unlist(edgeWeights(graph)))
+  #ew <- as.character(unlist(getEdgeW(graph)))
+  ew <- getEdgeW(graph)
+  print(ew)
+  #ew <- ew[setdiff(seq(along=ew), removedEdges(graph))]
+  names(ew) <- edgeNames(graph)
+  print(ew)
+  eAttrs <- list()
+  eAttrs$label <- ew
+  attrs <- list(node=list(fixedsize=FALSE))
+  attrs$edge$fontsize <- 15
+  print(ew)
+  plot(graph, edgeAttrs=eAttrs, attrs=attrs)
+}
+
+make.initial.graph <- function() {
+  g <- ug( ~z + x1)
+  g <- addEdge("z", "x1", g)
+  g <- addEdge("z", "z", g)
+  edgeDataDefaults(g, "w") <- "0"
+  edgeData(g, "z", "x1", "w") <- "-ab"
+  edgeData(g, "z", "z", "w") <- "O+ab"
+  
+  # add a path
+  g@graphData$path = list("x1")
+  
+  g
+}
+
+tt <- function() {
+  Sym("1 + 2+ 3 + g")
+}
+
+getEdgeW <- function(graph) {
+  #lapply(strsplit(edgeNames(g), "~"), function(x) {  edgeData(g, x[1], x[2], "w")   } )
+  unlist(lapply(strsplit(edgeNames(graph), "~"), function(x) { gsub('"', "",  mpr(Simplify( as.character(unlist(edgeData(graph, x[1], x[2], "w"))))))   } ))
+}
+
+
+g <- make.initial.graph()
+
+plot.g(g)
+
+update.weights <- function(g, movetype, from, to) {
+  if (movetype == "a") {
+    print("It was A!")
+    edgeData(g, from, to, "w") <- paste(edgeData(g, from, to, "w"), "+ 1")
+  } else if (movetype == "b") {
+    edgeData(g, from, to, "w") <- paste(edgeData(g, from, to, "w"), "+ (1 - b)")
+    edgeData(g, from, "z", "w") <- paste(edgeData(g, from, "z", "w"), "+ b")
+    edgeData(g, to, "z", "w") <- paste(edgeData(g, to, "z", "w"), "+ b")
+  } else if(movetype == "c") {
+    edgeData(g, from, to, "w") <- paste(edgeData(g, from, to, "w"), "+ (1 - b)")
+    edgeData(g, from, "z", "w") <- paste(edgeData(g, from, "z", "w"), "+ b")
+    edgeData(g, to, "z", "w") <- paste(edgeData(g, to, "z", "w"), "+ (1-a)*b")
+    edgeData(g, "z", "z", "w") <- paste(edgeData(g, "z", "z", "w"), "+ a*b")
+  }
+  g
+}
+
+get.path <- function(g) {
+  g@graphData$path
+}
+
+visit.new.node <- function(g) {
+  # add a new node indexes after the last node in the graph
+  node.name <- paste0("x", length(g@nodes))
+  g <- addNode(node.name, g)
+  
+  # add an edge between the new node and the last node in the path
+  pre.last.node <- get.last.node.in.path(g)
+  g <- addEdge(node.name, pre.last.node, g)
+  
+  # add an edge between z and the new node
+  g <- addEdge(node.name, "z", g)
+  
+  # update the path
+  g <- add.node.to.path(g, node.name)
+  
+  # update the weights
+  g <- update.weights(g, "c", pre.last.node, node.name)
+}
+
+add.node.to.path <- function(g, last.node) {
+  path <- g@graphData$path
+  path[length(path) + 1] <- last.node
+  g@graphData$path <- path
+  g
+}
+
+get.last.node.in.path <- function(g) {
+  path <- g@graphData$path
+  path[[length(path)]]
+}
+
+g <- update.weights(g, "a", "z", "x1")
+g <- update.weights(g, "b", "z", "x1")
+g <- update.weights(g, "c", "z", "x1")
+plot.g(g)
+
+
+g <- make.initial.graph()
+for (i in c(1,2,3, 4)) {
+  g <- visit.new.node(g)
+}
+g <- update.weights(g, "a", "x2", "x3")
+plot.g(g)
+get.path(g)
 

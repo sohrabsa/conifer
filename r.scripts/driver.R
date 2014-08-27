@@ -130,6 +130,8 @@ runner <- function(model = "GTR",
 #  "/home/sohrab/conifer/src/main/resources/conifer/sampleInput/FES.ape.4.nwk"  
   
   coniferProjectDir <- path.expand(coniferProjectDir)
+  print(coniferProjectDir)
+  
   mrbayesOutputDir <- path.expand(mrbayesOutputDir)
   dir.create(mrbayesOutputDir, showWarnings=F)
   
@@ -188,7 +190,9 @@ runner <- function(model = "GTR",
                                                 thinning=thinning, 
                                                 burn.in=burnin, 
                                                 numofgen=numofgen, 
-                                                model=model)
+                                                model=model,
+                                                fixed.topology=fixed.topology,
+                                                fixed.branch.length=fixed.branch.length)
   #     2.2.2. parse the outputs of conifer and produce ESS, ESSperSec, consensus tree with clade support, and clade support csv
   #     2.2.3. create symlinks in the output folder
   

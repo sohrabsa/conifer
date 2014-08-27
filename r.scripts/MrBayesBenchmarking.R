@@ -159,13 +159,16 @@ writeToDisk(mrbayes, bath.script.file.name)
 }
 
 mrbayes.analysis <- function(batch.script) {
-  system(paste0("mb ", batch.script), ignore.stdout = F)
-  #system(paste0("mb ", batch.script), ignore.stdout = T)
+  #system(paste0("mb ", batch.script), ignore.stdout = F, )
+  system(paste0("mbs ", batch.script), ignore.stdout = F)
 }
 
 
 mrbayes.calculate.ESS <- function(elapsed.time) {
   file.names <- list.files(".", pattern = "*.run1.p")
+
+  print(file.names);
+  
   mrbayes.posterior <- read.table(file.names[1], skip=1, header=T, check.names=F)
   
   mrbayes.posterior <- mrbayes.posterior[, c(3:ncol(mrbayes.posterior))]
@@ -250,12 +253,16 @@ mrbayes.driver.function <- function(treeFilePath,
   print(deparse(match.call()))
   currentWD <- getwd()
   
+  if (is.null(treeFilePath)) treeFilePath <- random.tree.from.fasta(alignmentFilePath)
+  
   # set dir where the mrbayes files should be placed
   MRBAYES_EXPERIMENT_PATH <<- file.path(batch.dir, format(Sys.time(), "mrbayes-%y-%m-%d-%H-%M-%S")) 
   dir.create(MRBAYES_EXPERIMENT_PATH)
   
   setwd(MRBAYES_EXPERIMENT_PATH)
   batch.file.name <- "mbbatch.txt"
+  
+  print(getwd())
   
   # make symbolik links to the data.files
   system(paste0("ln -s ", alignmentFilePath, " ", MRBAYES_EXPERIMENT_PATH))
@@ -297,12 +304,13 @@ mrbayes.driver.function <- function(treeFilePath,
 
 # mrbayes.driver.function(treeFilePath = "/Users/sohrab/project/conifer_fork/src/main/resources/conifer/sampleInput/FES.ape.4.nwk", alignmentFilePath = "/Users/sohrab/project/conifer_fork/src/main/resources/conifer/sampleInput/FES_4.fasta", model = "K80", batch.dir = "/Users/sohrab/project/conifer_fork/mrbayes", fixed.topology = F, fixed.branch.length = F, numofgen = 10000, burn.in = 1000, thinning = 10)
 
+# mrbayes.driver.function(treeFilePath = NULL, alignmentFilePath = "/Users/sohrab/project/conifer/simulated.data/simulation.5_FIXED_TOPOLOGY_FIXED_BRANCH_LENGHTS_DNAGTR/SimulatedData.fasta", model = "GTR", batch.dir = "/Users/sohrab/project/conifer_fork/mrbayes", fixed.topology = T, fixed.branch.length = T, numofgen = 10000, burn.in = 1000, thinning = 10)
 
 #mrbayes.driver.function("FES.ape.4.nwk", "FES_4.fasta")
 
 #consensus <- read.nexus("/Users/sohrab/Me/Apply/Canada\ Apply/Courses/Third\ Semester/conifer/extras/mrbayes/FES_8_batch.GTR.two/FES_8_batch.GTR.two.nex.tree1.con.tre")
 
-
+#system("mb")
 
 # sample GTR batch for mrbayes (with data.file including a tree called mm)
 # fixed topology
