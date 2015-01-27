@@ -53,19 +53,20 @@ conifer.run <- function(alignmentFilePath, treeFilePath, thinning, burn.in, numo
   
   # only compile the changed class for now)
   # system(paste0("javac ", " -classpath ", classpaths, " ", "-source 1.6 TestPhyloModel.java"))
-  system(paste0("javac ", " -classpath ", classpaths, " ", "TestPhyloModel.java"))
-  system(paste0("mv ", file.path(CONIFER_PROJECT_DIR, "src/main/java/conifer/TestPhyloModel*.class"), " ",  file.path(CONIFER_PROJECT_DIR, "/build/classes/main/conifer/")))
+  # system(paste0("javac ", " -classpath ", classpaths, " ", "TestPhyloModel.java"))
+  system(paste0("javac ", " -classpath ", classpaths, " ", "InstrumentedSimplePhyloModel.java"))
+  system(paste0("mv ", file.path(CONIFER_PROJECT_DIR, "src/main/java/conifer/InstrumentedSimplePhyloModel*.class"), " ",  file.path(CONIFER_PROJECT_DIR, "/build/classes/main/conifer/")))
     
   classpaths <- gsub(file.path(CONIFER_PROJECT_DIR, "/build/libs/conifer.jar:"), "", classpaths)
-  commandString <- paste0("java", " -classpath ", classpaths, " conifer.TestPhyloModel",
+  commandString <- paste0("java", " -classpath ", classpaths, " conifer.InstrumentedSimplePhyloModel",
                           " --initialTreeFilePath '", treeFilePath,
                           "' --alignmentFilePath '", alignmentFilePath, "'", 
                           " --factory.mcmc.nMCMCSweeps ", numofgen,
                           " --factory.mcmc.burnIn ", burn.in, 
-                          " --factory.mcmc.thinningPeriod ", thinning, 
-                          " --fixedTopology", fixed.topology,
-                          " --fixedBranchLength", fixed.branch.length,
-                          " --factory.mcmc.CODA", "false"
+                          " --factory.mcmc.thinningPeriod ", thinning
+#                          " --fixedTopology", fixed.topology,
+#                          " --fixedBranchLength", fixed.branch.length,
+#                          " --factory.mcmcOptions.CODA ", "false"
                           )
   commandString
   setwd(CONIFER_PROJECT_DIR)
@@ -79,7 +80,7 @@ conifer.run <- function(alignmentFilePath, treeFilePath, thinning, burn.in, numo
 
 conifer.calculate.ESS <- function(input.dir) {
   # calculate ess perseconds
-  # input.dir <- "/Users/sohrab/project/conifer/results/all/2014-08-19-09-54-13-j0Yos85y.exec"
+  # input.dir <- "/Users/sohrab/project/conifer/results/all/2015-01-26-18-21-25-OmtAkpso.exec"
   experiment.files <- c(input.dir)
   master.ess <- data.frame()
   #experiment <- experiment.files[[1]]
@@ -112,9 +113,13 @@ conifer.calculate.ESS <- function(input.dir) {
       
       colnames(l) <- c("ESS")
       rownames(l) <- gsub(".csv", "", unlist(rowNamesList))
-      k2 <- readLines(file.path(experiment, "experiment.details.txt"))
-      k2 <- k2[length(k2)]
-      experiment.length.in.seconds <- as.numeric(gsub("Total time in minutes: ", "", k2)) * 60 
+      # extract run-time
+      #k2 <- readLines(file.path(experiment, "experiment.details.txt"))
+      #k2 <- k2[length(k2)]
+      #experiment.length.in.seconds <- as.numeric(gsub("Total time in minutes: ", "", k2)) * 60 
+      endTime <- readLines(file.path(experiment, "executioninfo", "end-time.txt"))
+      startTime <- readLines(file.path(experiment, "executioninfo", "start-time.txt"))
+      experiment.length.in.seconds <- as.numeric(endTime) - as.numeric(startTime);
       write.csv(l, file.path(experiment, parameter.folder, "ess.txt"))
       master.ess <- rbind(master.ess, l)
       l[, 1] <- l[, 1] / experiment.length.in.seconds
@@ -181,5 +186,6 @@ conifer.driver.function <- function(treeFilePath,
   # calculate the concensus tree
   conifer.calculate.consensus.tree(output.folder)
   
-  CONIFER_EXPERIMENT_PATH
+  #CONIFER_EXPERIMENT_PATH  
+  output.folder
 }

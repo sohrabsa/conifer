@@ -11,6 +11,7 @@ make.bar.chart <- function(data, numberOfRuns, plotPath, ylab) {
   barchart <- barchart(ESS~parameter, data, groups=source, auto.key=T, 
                            main=paste0("MCMC with n = ", numberOfRuns), xlab="Parameters", ylab=ylab, scales=list(x=list(rot=90)))
   
+  print(plotPath)
   trellis.device(device="png", filename=plotPath)
   print(barchart)
   dev.off()

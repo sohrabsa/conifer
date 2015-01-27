@@ -120,11 +120,12 @@ runner <- function(model = "GTR",
                    burnin=as.integer(numofgen*.1), 
                    initialTreePath=NULL, 
                    alignmentPath=NULL, 
-                   coniferProjectDir=file.path("~", "conifer"),
+                   coniferProjectDir=file.path("~/project", "conifer"),
                    mrbayesOutputDir=file.path("~", "mrbayes"), 
                    fixed.topology=FALSE,
                    fixed.branch.length=FALSE,
-                   jumpmrbayes=FALSE) {
+                   jumpmrbayes=FALSE, 
+                   jumpconifer=FALSE) {
 
 #  "/home/sohrab/conifer/src/main/resources/conifer/sampleInput/FES_4.fasta"
 #  "/home/sohrab/conifer/src/main/resources/conifer/sampleInput/FES.ape.4.nwk"  
@@ -139,6 +140,7 @@ runner <- function(model = "GTR",
   burnin <- as.integer(burnin)
   thinning <- as.integer(thinning)
   jumpmrbayes <- as.logical(as.integer(jumpmrbayes))
+  jumpconifer <- as.logical(as.integer(jumpconifer))
   fixed.topology <- as.logical(as.integer(fixed.topology))
   fixed.branch.length <- as.logical(as.integer(fixed.branch.length))
   
@@ -152,6 +154,7 @@ runner <- function(model = "GTR",
   }
 # Rscript driver.R -alignmentPath ~/conifer/src/main/resources/conifer/sampleInput/FES_4.fasta --numofgen 100 -jumpmarbayes 1
   
+
   print(initialTreePath)
   
   # 2. run mrbayes and conifer with the given inputs
@@ -183,52 +186,61 @@ runner <- function(model = "GTR",
     stop(paste0("Couldn't find conifer at the provided path ", coniferProjectDir))
   }
 
-  # TODO: fixed branch length
-  conifer.output.dir <- conifer.driver.function(alignmentPath, 
-                                                initialTreePath, 
-                                                coniferProjectDir, 
-                                                thinning=thinning, 
-                                                burn.in=burnin, 
-                                                numofgen=numofgen, 
-                                                model=model,
-                                                fixed.topology=fixed.topology,
-                                                fixed.branch.length=fixed.branch.length)
-  #     2.2.2. parse the outputs of conifer and produce ESS, ESSperSec, consensus tree with clade support, and clade support csv
-  #     2.2.3. create symlinks in the output folder
+  conifer.output.dir <- NULL
   
-  # create a symbolic link in conifer's directory
-  mrbayes.make.symlink(conifer.output.dir)
-  
-  
-  # 3. comparison
-  #     3.1. ESS
-  #       3.1.1. combined mrbayes and conifer ess data.frame
-  mrbayes.ess <- mrbayes.load.ess()
-  conifer.ess <- conifer.load.ess()
-  ess <- combine.ess(mrbayes.ess, conifer.ess)
-  #       3.1.2. barchart of mrbayes and conifer
-  make.ess.barchart(ess, numberOfRuns = numofgen, conifer.output.dir)
-  
-  #     3.2. ESSperSec
-  mrbayes.ess.persecond <- mrbayes.load.esspersecond()
-  conifer.ess.persecond <- conifer.load.esspersecond()
-  essPerSecond <- combine.ess(mrbayes.ess.persecond, conifer.ess.persecond)
-  make.ess.per.second.barchart(essPerSecond, numofgen, conifer.output.dir)
-  
+  if (jumpconifer == FALSE) {
+    # TODO: fixed branch length
+    conifer.output.dir <- conifer.driver.function(alignmentPath, 
+                                                  initialTreePath, 
+                                                  coniferProjectDir, 
+                                                  thinning=thinning, 
+                                                  burn.in=burnin, 
+                                                  numofgen=numofgen, 
+                                                  model=model,
+                                                  fixed.topology=fixed.topology,
+                                                  fixed.branch.length=fixed.branch.length)
+  }
+    #     2.2.2. parse the outputs of conifer and produce ESS, ESSperSec, consensus tree with clade support, and clade support csv
+    #     2.2.3. create symlinks in the output folder
+    
+    # create a symbolic link in conifer's directory
+    mrbayes.make.symlink(conifer.output.dir)
 
-  #     3.3. consensus tree
-  #       3.3.1. head to head graphs
-  
-  # load consensus trees
-  conifer.consensus.tree <- conifer.load.consensus.tree()
-  mrbayes.consensus.tree <- mrbayes.load.consensus.tree()
-  
-  # are the consensus trees the same?
-  message <- ifelse(all.equal(conifer.consensus.tree, mrbayes.consensus.tree, use.edge.length=F), 
-         "Consensus trees are the same.", "Consensus trees do not match!") 
+  if (!jumpconifer && !jumpmrbayes) {
+    # 3. comparison
+    #     3.1. ESS
+    #       3.1.1. combined mrbayes and conifer ess data.frame
+    
+    mrbayes.ess <- mrbayes.load.ess()
+    conifer.ess <- conifer.load.ess()
+    ess <- combine.ess(mrbayes.ess, conifer.ess)
+    #       3.1.2. barchart of mrbayes and conifer
+    print("-=--")
+    print(conifer.output.dir)
+    make.ess.barchart(ess, numberOfRuns = numofgen, conifer.output.dir)
+    
+    #     3.2. ESSperSec
+    mrbayes.ess.persecond <- mrbayes.load.esspersecond()
+    conifer.ess.persecond <- conifer.load.esspersecond()
+    essPerSecond <- combine.ess(mrbayes.ess.persecond, conifer.ess.persecond)
+    make.ess.per.second.barchart(essPerSecond, numofgen, conifer.output.dir)
+    
+    
+    #     3.3. consensus tree
+    #       3.3.1. head to head graphs
+    
+    # load consensus trees
+    conifer.consensus.tree <- conifer.load.consensus.tree()
+    mrbayes.consensus.tree <- mrbayes.load.consensus.tree()
+    
+    # are the consensus trees the same?
+    message <- ifelse(all.equal(conifer.consensus.tree, mrbayes.consensus.tree, use.edge.length=F), 
+                      "Consensus trees are the same.", "Consensus trees do not match!") 
     print(message)
     writeLines(message, file.path(conifer.output.dir, "correctness.tests.txt"))
+  }
 
+  
     
 #   if (length(conifer.consensus.tree$tip.label) > 20) {
 #     mrbayes.consensus.tree <- subtrees(mrbayes.consensus.tree)[[which.max(mrbayes.consensus.tree$node.label)]]
@@ -258,3 +270,5 @@ runner <- function(model = "GTR",
 
 
 driver()
+
+#  Driver.R -alignmentPath /Users/sohrab/project/conifer/simulated.data/simulation.4_DEFAULT_DNAGTR/SimulatedData.fasta -jumpconifer 1

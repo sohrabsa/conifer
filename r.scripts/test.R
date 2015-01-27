@@ -1216,8 +1216,8 @@ make.initial.graph <- function() {
   g <- addEdge("z", "x1", g)
   g <- addEdge("z", "z", g)
   edgeDataDefaults(g, "w") <- "0"
-  edgeData(g, "z", "x1", "w") <- "-ab"
-  edgeData(g, "z", "z", "w") <- "O+ab"
+  edgeData(g, "z", "x1", "w") <- "-a*b"
+  edgeData(g, "z", "z", "w") <- "O+a*b"
   
   # add a path
   g@graphData$path = list("x1")
@@ -1241,7 +1241,6 @@ plot.g(g)
 
 update.weights <- function(g, movetype, from, to) {
   if (movetype == "a") {
-    print("It was A!")
     edgeData(g, from, to, "w") <- paste(edgeData(g, from, to, "w"), "+ 1")
   } else if (movetype == "b") {
     edgeData(g, from, to, "w") <- paste(edgeData(g, from, to, "w"), "+ (1 - b)")
@@ -1279,6 +1278,19 @@ visit.new.node <- function(g) {
   g <- update.weights(g, "c", pre.last.node, node.name)
 }
 
+visit.old.node <- function(g, the.node) {
+  
+  pre.last.node <- get.last.node.in.path(g)
+  print(pre.last.node)
+  # update the path
+  g <- add.node.to.path(g, the.node)
+  
+  # update the weights
+  g <- update.weights(g, "a", pre.last.node, the.node)
+  
+  g
+}
+
 add.node.to.path <- function(g, last.node) {
   path <- g@graphData$path
   path[length(path) + 1] <- last.node
@@ -1301,7 +1313,56 @@ g <- make.initial.graph()
 for (i in c(1,2,3, 4)) {
   g <- visit.new.node(g)
 }
-g <- update.weights(g, "a", "x2", "x3")
+
+g <- visit.old.node(g, "x4")
+
 plot.g(g)
 get.path(g)
 
+
+# make a file with index chunks for cn charsequence jason file
+
+
+setwd("/Users/sohrab/project/conifercp/src/main/resources/")
+# add JSON structure
+result <- paste0('{\n  "caseSensitive" : false,\n  "orderedSymbols" : [ ')
+
+# add the states
+for (i in 0:5) {
+  for (j in 0:5) {
+    result <- paste0(result, '"', i, ',', j,  '"')
+    if (i * 5 + j == 18) 
+      result <- paste0(result, "\n  ")
+    
+    if (i != 5 | j != 5)
+      result <- paste0(result, ", ")
+  }
+}
+
+result <- paste0(result, " ],\n")
+
+# add ambiguity
+result <- paste0(result, '  "ambiguousSymbols": {\n')
+result <- paste0(result, '"-,1": [ "1,1", "2,1", "3,1" ] \n}\n}')
+
+
+                 
+result
+cat(result)
+
+writeLines(result, "cn-iupac-encoding.txt")
+
+
+# hello theer! Eucleadian distance
+dist_mat <- matrix(0, nrow=n_samples, ncol=n_samples)
+for (i in unique(d$sample_id)) {
+  v1 <- subset(d, sample_id == i, c(ref_ratio, alt_ratio))
+  for (j in unique(d$sample_id)) {
+    v2 <- subset(d, sample_id == j, c(ref_ratio, alt_ratio))
+    #print("h")
+    dist_mat[i,j] <- sqrt(sum((v1$ref_ratio - v2$ref_ratio)^2 + (v1$alt_ratio - v2$alt_ratio)^2))
+  }
+}
+
+#heatmap(dist_mat, Rowv = NA, Colv = NA, scale = "none", margins = c(5, 8))
+#heatmap(dist_mat, scale = "none", margins = c(5, 8))

@@ -338,3 +338,6 @@ mrbayes.driver.function <- function(treeFilePath,
 # mcmc ngen=10000 samplefreq=10
 # sump burnin=1000
 # sumt burnin=1000
+
+# /Users/sohrab/project/conifer/simulated.data/simulation.4_DEFAULT_DNAGTR/SimulatedData.fasta
+# mrbayes.driver.function(NULL, "/Users/sohrab/project/conifer/simulated.data/simulation.4_DEFAULT_DNAGTR/SimulatedData.fasta", ".", "GTR", 10, 1000, 10000, T, T)
