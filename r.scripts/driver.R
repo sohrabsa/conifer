@@ -271,4 +271,9 @@ runner <- function(model = "GTR",
 
 driver()
 
+
+# Rscript Driver.R -alignmentPath /Users/sohrab/Desktop/extreme.fasta  -jumpconifer 1
+
+
 #  Driver.R -alignmentPath /Users/sohrab/project/conifer/simulated.data/simulation.4_DEFAULT_DNAGTR/SimulatedData.fasta -jumpconifer 1
+# Rscript Driver.R -alignmentPath /Users/sohrab/project/conifer/simulated.data/simulation.4_DEFAULT_DNAGTR/SimulatedData.fasta -initialTreePath /Users/sohrab/project/conifer/simulated.data/simulation.4_DEFAULT_DNAGTR/SimulatedDataTree.newick

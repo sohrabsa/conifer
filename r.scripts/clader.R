@@ -1,6 +1,8 @@
 library(phytools)
 library(ape)
 library(coda)
+library(distory)
+# install.packages('distory')
 
 # write these valuse as pecial node comments to be visualized by figtree (special node comments, ref:https://pythonhosted.org/DendroPy/scripts/sumtrees.html)
 # what is majority-rule clade consensus tree 
@@ -270,5 +272,116 @@ add.support.to.tree <- function(tree, )
 plot.side.by.side(tree1, tree2, all.sub.trees)
 
 
+### experiment on distance between two phylo trees
+## what model are we using for simulation? we used GTR to simulate, it had kimura
+
+## original simulated tree
+# /Users/sohrab/project/conifer/simulated.data/simulation.4_DEFAULT_DNAGTR/SimulatedDataTree.newick
+original.tree <- read.tree('/Users/sohrab/project/conifer/simulated.data/simulation.4_DEFAULT_DNAGTR/SimulatedDataTree.newick')
+
+other.conifer.tree <- read.tree('/Users/sohrab/project/conifer/results/all/2015-02-02-04-58-10-zDsuYnpo.exec/FESConsensusTree.Nexus')
+
+# westrun trees
+# '~/Downloads/configRuns.newick'
+westrun.trees <- read.tree('~/Downloads/configRuns.newick')
+westrun.tree <- westrun.trees[[1]]
+
+original.tree$edge.length
+westrun.tree$edge.length
+
+sometree <- original.tree
+sometree$edge.length <- original.tree$edge.length / max(original.tree$edge.length)
+plot(sometree)
+dist.topo(original.tree, sometree, method = 'score')
+
+normalized.tree <- westrun.tree
+normalized.tree$edge.length <- normalized.tree$edge.length / max(normalized.tree$edge.length)
+
+plot(normalized.tree)
+
+
+plottrees(sometree, normalized.tree, names=c('original', 'westrun'))
+dist.topo(sometree, normalized.tree)
+
+# normalize trees
+west.trees.norm <- westrun.trees
+l <- length(westrun.trees)
+for (i in 1:l) {
+  west.trees.norm[[i]]$edge.length <- west.trees.norm[[i]]$edge.length/ max(west.trees.norm[[i]]$edge.length)
+}
+
+plottrees(west.trees.norm[[45]], west.trees.norm[[33]], c('45', '33'))
+
+# 33 is non trivial
+## this actually works
+dist.topo(sometree, west.trees.norm[[33]], 'score')
+plottrees(sometree, west.trees.norm[[33]], c('original', '33'))
+dist.topo(original.tree, westrun.trees[[33]], 'score')
+
+dist.topo(original.tree, original.tree, method = 'score')
+dist.topo(original.tree, westrun.tree, method = 'score')
+
+
+# distroy
+dist.multiPhylo(list(original.tree, westrun.trees[[33]]))
+
+plottrees(westrun.tree, original.tree)
+
+
+
+dist.topo(original.tree, westrun.tree, method = 'score')
+dist.topo(westrun.trees[[2]], westrun.tree, method = 'score')
+dist.topo(westrun.trees[[2]], westrun.tree)
+
+dist.topo(westrun.trees[[2]], westrun.trees[[10]], 'score')
+
+ll <- length(westrun.trees)
+for (i in 1:ll) {
+  for (j in 1:ll) {
+    d <- (dist.topo(westrun.trees[[i]], westrun.trees[[j]]))
+    if (d >= 1) print(paste(i, j, d))
+  }
+}
+  
+
+non.trivials.ids <- c()
+non.trivials.dist <- c()
+
+for (i in 1:ll) {
+    d <- (dist.topo(westrun.trees[[i]], westrun.trees[[1]]))
+    if (d >= 1) {
+      print(paste(i, 1, d))
+      d2 <- 1;
+      tryCatch(d2 <<- dist.topo(westrun.trees[[i]], original.tree, 'score'), 
+                  error = function(err) {
+                 # error handler picks up where error was generated
+                 print(paste("MY_ERROR:  ",err))
+                 return(1)
+               })
+      
+      non.trivials.ids <- c(non.trivials.ids, i) 
+      non.trivials.dist <- c(non.trivials.dist, d2)
+      print(paste(i, 1, d2))
+    }
+}
+plottrees(sometree, west.trees.norm[[2]], c('original', '2'))
+
+result <- data.frame(id=non.trivials.ids, dist=non.trivials.dist)
+write.csv(result, '~/Desktop/west.run.dist.csv')
+
+plottrees <- function(tree1, tree2, names) {
+  par(mfrow=c(1,2))
+  plot(tree1, main=names[1])
+  nodelabels(tree1$node.label)
+  #set.node.labels(tree1, get.count.for.tree(tree1, all.sub.trees))
+  plot(tree2, direction = "leftwards", main=names[2])
+  nodelabels(tree2$node.label)
+  #set.node.labels(tree2, get.count.for.tree(tree1, all.sub.trees))
+}
+
+### show the trees
+for (i in non.trivials.ids) {
+  plottrees(westrun.trees[[i]], original.tree, c(i, 'original'))
+}
 
 
