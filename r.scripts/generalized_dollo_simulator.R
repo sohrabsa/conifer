@@ -8,27 +8,37 @@
   library(VGAM)
   library(lattice)
   
-  # TODO: add absorbing state
-    # won't progress through the tree
-  # TODO: sample before insertion
-  # TODO: save ancestral states
-  # TODO: generate a better tree 
+  # TODO: add rejection sampling (instead of removing absorbing state of the above process)
+  # TODO: save ancestral states 
   # TODO: add nucleotide statistics
-  # TODO: fix the problem with the unrooted tree
-  # TODO: assume there is no complete delete
-  # TODO: incorporate b to the state space
-  # TODO: the above process shouldn't be able to delete
-  # TODO: make it compatible with are state space
-  # TODO: add the emission model
-  # TODO: add distribution test on the nucleotide on each leaf at each site chaning the root
+  #       add distribution test on the nucleotide on each leaf at each site chaning the root
   # TODO: add test for above and below processs
-  
+  # ------------------------
+  # DONE 
+  # ------------------------
+  # added the emission model
+  # added sample before insertion
+  # added generate a better tree
+  # added fix the problem with the unrooted tree
+  # added assume there is no complete delete in above process
+  # added copy number CTMC state space
+  # added absorbing state (won't progress through the tree)
+
   # Inputs
   runAbove <- TRUE
   runBelow <- TRUE
   shallPrint <- TRUE
+  baseDir <- '/Users/sohrab/Google\ Drive/Masters/Thesis/Proposal/committee_meetings/Feb16'
+  mainDir <- '/Users/sohrab/Google\ Drive/Masters/Thesis/Proposal/committee_meetings/Feb16'
   
-  
+  # Internal diagnosis variables
+  xx.taxa <- NULL
+  xx.state.labels <- NULL
+  xx.table <- NULL
+  xx.emission <- NULL
+  xx.tree <- NULL
+  xx.sites <<- NULL
+  xx.state.labels.below <- NULL
   
   ## CTMC
   # states mapping
@@ -53,8 +63,6 @@
       wait.time <- rexp(1, -rateMatrix[current.state, current.state])
       
       # choose a new state (shouldn't be the same one)
-      print('***')
-      print(rateMatrix[current.state, -c(current.state)])
       current.state <- sample(states[states != current.state], 1, prob = rateMatrix[current.state, -c(current.state)])
       pprint(current.state)
       # absorbing state
@@ -114,7 +122,6 @@
     result
   }
   
-  
   # preorder traverse of the tree and collect states
   # Assumes it's not possible to completely remove
   # input: tree, initial.state
@@ -163,7 +170,7 @@
   pickPointOnEdge <- function(tree, mu) {
     tree <- reorder(tree)
     probs <- c(tree$edge.length, 1/mu)
-    
+    pprint(probs)
     # choose a branch
     br <- sample(seq(probs), 1, prob=probs)
     if (br == length(probs)) {
@@ -175,139 +182,121 @@
     }
   }
   
-  driver.flat <- function(tree, nSites, initialDistribution, rateMatrix, mu) {
-    
-    state.labels <- list(colnames(rateMatrix[[1]]), colnames(rateMatrix[[2]]))
-    states <- seq(length(state.labels))
-    
-    # Sample multiple sites
-    sites <- list()
-    for (i in seq(nSites)) {
-      edgePoint <- pickPointOnEdge(tree, mu)
-      pprint(edgePoint)
-      # set the state at the root (normal state for cancer)
-      temp1 <- NULL
-      
-      if (runAbove & ( !(edgePoint[1] == 1 & edgePoint[2] == 0) | !runBelow) ) {
-        if (edgePoint[1] == 1 & edgePoint[2] == 0) {
-          edgePoint <- pickPointOnEdge(tree, INF)
-        }
-        temp1 <- treeCTMC.edge.point.exclude(tree, 1, edgePoint[1], edgePoint[2], rateMatrix[[1]])
-        rareEventState <- temp1[tree$edge[edgePoint[1], 2]]
-      } else {
-        rareEventState <- sample(states[[1]], 1, prob=pi)
-      }
-      
-      # TODO: change the second component of the state space to reflect rare event
-      pprint(temp1)
-      
-      temp2 <- NULL
-      if(runBelow)
-        temp2 <- treeCTMC.edge.point(tree, rareEventState, edgePoint[1], edgePoint[2], rateMatrix[[2]])
-      
-      if (is.null(temp1)) 
-        temp1 <- temp2
-      else if (is.null(temp2))
-        temp2 <- temp1
-      
-      # merge the two
-      sites[[i]] <- list()
-      for(j in seq(length(temp1))) {
-        sites[[i]][j] <- ifelse(is.null(temp1[[j]]), temp2[[j]], temp1[[j]])
-      }
-      
-      pprint(sites[[i]])
-    }
-    
-    # Extract taxa
-    nTaxa <- length(tree$tip)
-    taxa <- list()
-    for (i in seq(nTaxa)) {
-      taxon <- list()
-      for (j in seq(nSites)) {
-        taxon[[j]] <- sites[[j]][[i]]
-      }
-      taxa[[i]] <- taxon
-    }
-    
-    # augment state space
-    state.labels[length(states) + 1] <- '-'
-    
-    # Taxa to fasta
-    fasta <- taxaToFasta(taxa, state.labels)
-    
-    print(fasta)
-    
-    # save the tree
-    write.tree(tree, "~/Desktop/originalTree.nwk")
+  cnMapFun <- function(initialState, state.labels) {
+    tempState <- stringToCTMCPair(state.labels[[1]][initialState[[1]]])
+    targetState <- grep(generateCNCTMCStateString(tempState[1]-1, 1), state.labels[[2]])
+    targetState
   }
   
-  xx.taxa <- NULL
-  xx.state.labels <- NULL
-  xx.table <- NULL
-  xx.emission <- NULL
+  nucleotideMapFun <- function(initialState, state.labels) {
+    initialState
+  }
   
-  driver.ctmc <- function(tree, nSites, initialDistribution, rateMatrix, mu) {
-    print(rateMatrix[[1]])
-    
+  sample.sites <- function(tree, nSites, initial.distribution, rateMatrix, mu, rareEventEdgePointIn = NULL, mapFUN) {
     state.labels <- list(colnames(rateMatrix[[1]]), colnames(rateMatrix[[2]]))
     states <- list(seq(length(state.labels[[1]])), seq(length(state.labels[[2]])))
-                             
+    
     # Sample multiple sites
     sites <- list()
     for (i in seq(nSites)) {
-      edgePoint <- pickPointOnEdge(tree, mu)
-      pprint(edgePoint)
+      if (is.null(rareEventEdgePointIn))
+        rareEventEdgePoint <- pickPointOnEdge(tree, mu)
+      else 
+        rareEventEdgePoint <- rareEventEdgePointIn
+      
+      pprint(rareEventEdgePoint)
       # set the state at the root (normal state for cancer)
       temp1 <- NULL
-     
-      if (runAbove & ( !(edgePoint[1] == 1 & edgePoint[2] == 0) | !runBelow) ) {
-        if (edgePoint[1] == 1 & edgePoint[2] == 0) {
-          edgePoint <- pickPointOnEdge(tree, INF)
+      
+      if (runAbove & ( !is.root(rareEventEdgePoint) | !runBelow) ) {
+        if (is.root(rareEventEdgePoint)) {
+          rareEventEdgePoint <- pickPointOnEdge(tree, 1000000000)
         }
         root.state <- sample(states[[1]], 1, prob=initial.distribution[[1]])
-        temp1 <- treeCTMC.edge.point.exclude(tree, root.state, edgePoint[1], edgePoint[2], rateMatrix[[1]])
-        rareEventState <- temp1[tree$edge[edgePoint[1], 2]]
+        pprint(root.state)
+        temp1 <- treeCTMC.edge.point.exclude(tree, root.state, rareEventEdgePoint[1], rareEventEdgePoint[2], rateMatrix[[1]])
+        rareEventState <- temp1[tree$edge[rareEventEdgePoint[1], 2]]
       } else {
-        pprint(states[[1]])
-        pprint(initial.distribution[[1]])
         rareEventState <- sample(states[[1]], 1, prob=initial.distribution[[1]])
-        pprint(rareEventState)
       }
-      
-      # TODO: change the second component of the state space to reflect rare event
       pprint(rareEventState)
-      tempState <- stringToCTMCPair(state.labels[[1]][rareEventState[[1]]])
-      pprint(tempState)
-      rareEventState <- grep(generateCNCTMCStateString(tempState[1]-1, 1), state.labels[[2]])
-      pprint(rareEventState)
-      pprint(temp1)
+        
+      # Change the second component of the state space to reflect rare event
+      rareEventState <- mapFUN(rareEventState, state.labels)
       
       temp2 <- NULL
       if(runBelow)
-        temp2 <- treeCTMC.edge.point(tree, rareEventState, edgePoint[1], edgePoint[2], rateMatrix[[2]])
+        temp2 <- treeCTMC.edge.point(tree, rareEventState, rareEventEdgePoint[1], rareEventEdgePoint[2], rateMatrix[[2]])
       
-      if (is.null(temp1)) 
+      if (is.null(temp1)) {
         temp1 <- temp2
-      else if (is.null(temp2))
-        temp2 <- temp1
+        for(j in seq(length(temp1))) {
+          temp1[[j]] <- temp2[[j]] + nrow(rateMatrix[[1]])
+        }
+      } else if (is.null(temp2)) {
+        temp2 <- replaceNullWithAbsorbingState(temp1, rateMatrix[[1]])
+      }
       
       # merge the two
       sites[[i]] <- list()
       for(j in seq(length(temp1))) {
-          sites[[i]][j] <- ifelse(is.null(temp1[[j]]), temp2[[j]] + nrow(rateMatrix[[1]]), temp1[[j]])
+        sites[[i]][j] <- ifelse(is.null(temp1[[j]]), temp2[[j]] + nrow(rateMatrix[[1]]), temp1[[j]])
       }
       
       pprint(sites[[i]])
     }
+    
+    xx.sites <<- sites
     
     # Merge state spaces
     state.labels <- c(colnames(rateMatrix[[1]]), colnames(rateMatrix[[2]]))
     states <- seq(state.labels)
-
+    
     xx.state.labels <<- state.labels
     
     # Extract taxa
+    taxa <- extract.taxa(sites, tree)
+    
+    return(list(sites=sites, taxa=taxa, state.labels=state.labels))
+  }
+  
+  driver.simple <- function(tree, nSites, initial.distribution, rateMatrix, mu, rareEventEdgePoint = NULL, mapFUN) {
+    
+    result <- sample.sites(tree, nSites, initial.distribution, rateMatrix, mu, rareEventEdgePoint, mapFUN)
+    
+    sites <- result$sites
+    taxa <- result$taxa
+    state.labels <- result$state.labels
+    
+    # Extract fasta
+    fasta <- fastaFromTaxa(taxa, state.labels, file.path(mainDir, 'dollo.fasta'))
+    print(fasta)
+    
+    print(paste0('Result in ', mainDir))
+    system(paste0('open \"', mainDir, '\"'))
+  }
+  
+  driver.ctmc <- function(tree, nSites, initial.distribution, rateMatrix, mu, rareEventEdgePoint = NULL, mapFUN) {
+    
+    result <- sample.sites(tree, nSites, initial.distribution, rateMatrix, mu, rareEventEdgePoint, mapFUN)
+    
+    sites <- result$sites
+    taxa <- result$taxa
+    state.labels <- result$state.labels
+    
+    # Extract csv version 
+    cnTableVersion <- CNfromTaxa(taxa, state.labels, file.path(mainDir, 'dollo.cn.csv'))
+    print(cnTableVersion)
+    
+    # Generate emission
+    tableEmission <- emissionFromCN(cnTableVersion, file.path(mainDir, 'dollo.emission.csv'))
+    
+    print(paste0('Result in ', mainDir))
+    system(paste0('open \"', mainDir, '\"'))
+  }
+  
+  extract.taxa <- function(sites, tree) {
+    nSites <- length(sites)
     nTaxa <- length(tree$tip)
     taxa <- list()
     for (i in seq(nTaxa)) {
@@ -320,82 +309,48 @@
     
     xx.taxa <<- taxa
     
-    # extract csv version 
-    tableVersion <- CNfromTaxa(taxa, state.labels, '~/Desktop/dollo.cn.csv')
-    print(tableVersion)
-  
-    xx.table <<- tableVersion
-    
-    # generate emission
-    tableEmission <- tableVersion
-    for (i in seq(nrow(tableVersion))) {
-      tempEmission <- emissions(tableVersion$ref_counts[i], tableVersion$alt_counts[i])
-      tableEmission$ref_counts[i] <- tempEmission[1]
-      tableEmission$alt_counts[i] <- tempEmission[2]
-    }
-    write.csv(tableEmission, '~/Desktop/dollo.emission.csv')
-    print(tableEmission)
-    pplot(tableEmission)
-    xx.emission <<- tableEmission
-    # save the tree
-    write.tree(tree, "~/Desktop/originalTree.nwk")
+    taxa
   }
-  
-  xx.tree <- NULL
+
   # get the parent of the chosen node
   # itterate till you get to the parrent again, stop
-  example <- function() {
-    nSites <- 48
+  example <- function(seed=4) {
+    setup.main.dir()
+    nSites <- 100
     nTaxa <- 4
-    set.seed(4)
-    x <- rtree(nTaxa,T)
-    x$tip.label <- paste0('t', 1:nTaxa)
-    
-    # SHOULD simulated above rare event?
-    runAbove <<- TRUE
-    runBelow <<- TRUE
-    
-    #x <- xx.tree
-    plot(x)
-    nodelabels()
-    tiplabels();
-    x <- reorder(x)
-    xx.tree <<- x
-    
-    mu <- .01
-    rateMatrix <- deleteRateMatrix(mu, size = length(states))
-    print(rateMatrix)
-    initial.distribution <- rep(1/length(states), length(states))
-    # put zero for the delete state
-    if (rateMatrix[length(states), length(states)] == 0) {
-      initial.distribution[length(states)] <- 0
-    }
-    
-    # (tree, nSites, initialDistribution, rateMatrix , states, state.labels, mu) {
-    driver(x, nSites, initial.distribution, rateMatrix, states, state.labels, mu)
-  }
-  
-  example.ctmc <- function() {
-    nSites <- 48
-    nTaxa <- 4
-    #set.seed(4)
-    maxCopyNumber <- 3
-    x <- rtree(nTaxa,T)
-    x$tip.label <- paste0('t', 1:nTaxa)
+    mu <- 0.1
+    if (!is.null(seed))
+      set.seed(seed)
+    tree <- setup.tree(nTaxa)
     
     # SHOULD simulated above rare event?
     runAbove <<- TRUE
     runBelow <<- TRUE
 
-    # Plot and reorder the tree
-    plot(x)
-    nodelabels()
-    tiplabels();
-    x <- reorder(x)
-    xx.tree <<- x
+    rateMatrix <- list(deleteRateMatrix.above(mu), deleteRateMatrix.below(mu))
     
+    initial.distribution <- list()
+    for (r in rateMatrix) {
+      initial.distribution[[length(initial.distribution) + 1]] <- deathlessInitialDistribution(r)
+    }
+
+    driver.simple(tree, nSites, initial.distribution, rateMatrix, mu, rareEventEdgePoint=NULL, nucleotideMapFun)
+  }
+  
+  example.ctmc <- function() {
+    setup.main.dir()
+    set.seed(4)
+    nSites <- 48
+    nTaxa <- 4
+    mu <- .01
+    maxCopyNumber <- 3
+    tree <- setup.tree(nTaxa)
+    
+    # SHOULD simulated above rare event?
+    runAbove <<- TRUE
+    runBelow <<- TRUE
+
     rateMatrix <- list(generateCNRateMatrix.above(maxCopyNumber), generateCNRateMatrix.below(maxCopyNumber))
-    mu <- .1
     
     # initial distribution
     initial.distribution <- list()
@@ -404,7 +359,7 @@
     }
     
     # (tree, nSites, initialDistribution, rateMatrix, mu) {
-    driver.ctmc(x, nSites, initial.distribution, rateMatrix, mu)
+    driver.ctmc(tree, nSites, initial.distribution, rateMatrix, mu, rareEventEdgePoint=NULL, cnMapFun)
   }
   
   ## Utils  
@@ -427,7 +382,25 @@
     
     result <- data.frame(sample_id, site_id, ref_counts, alt_counts, cluster_id)
     write.csv(result, outPath)
+    pplot(result, outPath)
+    xx.table <<- result
+    
     result
+  }
+  
+  emissionFromCN <- function(cnTableVersion, outPath) {
+    tableEmission <- cnTableVersion
+    for (i in seq(nrow(cnTableVersion))) {
+      tempEmission <- emission(cnTableVersion$ref_counts[i], cnTableVersion$alt_counts[i])
+      tableEmission$ref_counts[i] <- tempEmission[1]
+      tableEmission$alt_counts[i] <- tempEmission[2]
+    }
+    write.csv(tableEmission, outPath)
+    print(tableEmission)
+    pplot(tableEmission, outPath)
+    xx.emission <<- tableEmission
+    
+    tableEmission
   }
   
   fastaFromTaxa <- function(taxa, state.labels, outPath) {
@@ -466,6 +439,17 @@
     return(rateMatrix)
   }
   
+  replaceNullWithAbsorbingState <- function(someList, rateMatrix) {
+    deleteStateIndex <- indexForAbsorbingState(rateMatrix)
+    
+    for (i in seq(length(someList))) {
+      if (is.null(someList[[i]])) {
+        someList[[i]] <- deleteStateIndex
+      }
+    }
+    someList
+  }
+  
   degenerateInitDistribution <- function(rateMatrix, degenStateStr) {
     states <- colnames(rateMatrix)
     as.numeric(states == degenStateStr)
@@ -473,8 +457,8 @@
   
   deathlessInitialDistribution <- function(rateMatrix) {
     temp.dist <- rep(1/ncol(rateMatrix), ncol(rateMatrix))
-    for (i in nrow(r)) {
-      if (r[i, i] == 0)
+    for (i in nrow(rateMatrix)) {
+      if (rateMatrix[i, i] == 0)
         temp.dist[i] <- 0
     }
     temp.dist
@@ -489,8 +473,8 @@
     result
   }
   
-  deleteRateMatrix <- function(deleteRate=1, size=5) {
-   
+  deleteRateMatrix.below <- function(deleteRate=1) {
+    size <- 5    
     result <- matrix(c(0, 1, 1, 1, deleteRate,   
                        1, 0, 1, 1, deleteRate,   
                        1, 1, 0, 1, deleteRate, 
@@ -499,8 +483,17 @@
     for (i in seq(size))
       result[i, i] <- -sum(result[i,])
     
+    state.labels <- c('A', 'T', 'C', 'G', '-')
+    colnames(result) <- state.labels
+    rownames(result) <- state.labels
+    xx.state.labels.below <<- state.labels
     return(result)
   }
+  
+  deleteRateMatrix.above <- function(deleteRate =1) {
+    result <- deleteRateMatrix.below(deleteRate)
+    removeAbsorbingState(result)
+  } 
   
   generateCNCTMCStateString <- function(i, j) {
     paste0('(', i, ',', j, ')')
@@ -514,7 +507,6 @@
     result <- strsplit(result, ",")
     as.numeric(result[[1]])
   }
-  
   
   # when a mutation hasn't happened
   # Should not be able to go to a complete delete state
@@ -588,15 +580,9 @@
     
     colnames(rateMatrix) <- states
     rownames(rateMatrix) <- states
-   
+    xx.state.labels.below <<- states
+      
     rateMatrix
-  }
-  
-  pprint <- function(a) {
-    if (shallPrint) {
-      arg <- deparse(substitute(a))
-      print(paste0(arg, ' = ', a))
-    }
   }
    
   getDescendants<-function(tree,node,curr=NULL){
@@ -653,11 +639,142 @@
     return(xi)
   }
   
-  pplot <- function(df) {
+  pplot <- function(df, outPath = NULL) {
     # "sample_id","site_id","ref_counts","alt_counts","cluster_id"
-    xyplot(ref_counts + alt_counts ~ site_id, df, auto.key = T)
+    p <- xyplot(ref_counts + alt_counts ~ site_id, df, auto.key = T)
+    if (!is.null(outPath)) {
+      trellis.device(device="png", filename=paste0(outPath, ".png"), width= 1470, height= 980)
+      print(p)
+      dev.off()
+    } else {
+      print(p)
+    }
+  }
+  
+  pprint <- function(a) {
+    if (shallPrint) {
+      arg <- deparse(substitute(a))
+      #print(paste0(sys.call(sys.parent(1)), ' -> ', arg, ' = ', a))
+      if (grepl('current.state', arg)) {
+        print(paste0(arg, ' = ', a, ' -> ', xx.state.labels.below[as.numeric(a)])) 
+      } else {
+        print(paste0(arg, ' = ', a))
+      }
+    }
+  }
+  
+  ### Unit tests
+  setup.tree <- function(nTaxa) {
+    tree <- rtree(nTaxa,T)
+    tree$tip.label <- paste0('t', 1:nTaxa)
+    
+    # Plot and reorder the tree
+    plot(tree)
+    nodelabels()
+    tiplabels();
+    tree <- reorder(tree)
+    xx.tree <<- tree
+    
+    write.tree(tree, file.path(mainDir, 'originalTree.nwk'))
+    
+    tree
+  } 
+  
+  setup.main.dir <- function() {
+    mainDir <<- file.path(baseDir,format(Sys.time(), "%Y-%a-%b-%d-%H-%M-%OS"))
+    if (!file.exists(mainDir)) {
+      dir.create(mainDir)
+    }
+  }
+  
+  test.Run.above <- function() {
+    set.seed(4)
+    setup.main.dir() 
+    # pick a point at a leaf
+    nSites <- 4
+    nTaxa <- 6
+    maxCopyNumber <- 3
+    tree <- setup.tree(nTaxa)
+    mu <- .1
+    
+    # SHOULD simulated above rare event?
+    runAbove <<- TRUE
+    runBelow <<- FALSE
+    
+    rateMatrix <- list(generateCNRateMatrix.above(maxCopyNumber), generateCNRateMatrix.below(maxCopyNumber))
+
+    # initial distribution
+    initial.distribution <- list()
+    for (r in rateMatrix) {
+      initial.distribution[[length(initial.distribution) + 1]] <- degenerateInitDistribution(r, '(2,0)')
+    }
+  
+    rarePoint <- c(nrow(tree$edge), tree$edge.length[nrow(tree$edge)])
+    driver.ctmc(tree, nSites, initial.distribution, rateMatrix, mu, rarePoint)
+    
+    test <- list(passed=TRUE)
+    if (any(xx.table$alt_counts !=  0)) {test$passed <- FALSE; test$message <- 'non-zero alt_counts'}
+    if (any(xx.table$ref_counts ==  0)) {test$passed <- FALSE; test$message <- 'zero ref_counts'}
+    
+    if (!test$passed) {
+      stop(paste0('Failed Test, message:', test$message))
+    } else {
+      print(paste0('Passed test in ', match.call()[[1]]))
+    }
+  }
+  
+  pick.root <- function(tree) {
+    c(1, 0)
+  }
+  
+  pick.last.leaf <- function(tree) {
+    c(nrow(tree$edge), tree$edge.length[nrow(tree$edge)])
+  }
+  
+  is.root <- function(edgePoint) {
+    return (edgePoint[1] == 1 & edgePoint[2] == 0)
+  }
+  
+  test.Run.below <- function(seed=4) {
+    if (!is.null(seed))
+      set.seed(seed)
+    
+    setup.main.dir() 
+    # pick a point at a leaf
+    nSites <- 1
+    nTaxa <- 4
+    maxCopyNumber <- 3
+    tree <- setup.tree(nTaxa)
+    mu <- .1
+    
+    # SHOULD simulated above rare event?
+    runAbove <<- FALSE
+    runBelow <<- TRUE
+    
+    rateMatrix <- list(generateCNRateMatrix.above(maxCopyNumber), generateCNRateMatrix.below(maxCopyNumber))
+    
+    # initial distribution
+    initial.distribution <- list()
+    for (r in rateMatrix) {
+      initial.distribution[[length(initial.distribution) + 1]] <- degenerateInitDistribution(r, '(2,0)')
+    }
+    
+    rarePoint <- pick.root(tree)
+    driver.ctmc(tree, nSites, initial.distribution, rateMatrix, mu, rarePoint)
+    
+#     test <- list(passed=TRUE)
+#     if (any(xx.table$alt_counts !=  0)) {test$passed <- FALSE; test$message <- 'non-zero alt_counts'}
+#     if (any(xx.table$ref_counts ==  0)) {test$passed <- FALSE; test$message <- 'zero ref_counts'}
+#     
+#     if (!test$passed) {
+#       stop(paste0('Failed Test, message:', test$message))
+#     } else {
+#       print(paste0('Passed test in ', match.call()[[1]]))
+#     }
   }
   
   #### Run examles 
-
-  example.ctmc()
+  example()
+  #example.ctmc()
+  #test.Run.above()
+  #test.Run.below(NULL)
